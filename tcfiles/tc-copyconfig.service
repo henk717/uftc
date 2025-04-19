@@ -1,14 +1,14 @@
 [Unit]
 Description=Copy ThinClient Configuration
-ConditionPathExists=/boot/tc-config
+ConditionPathExists=/boot/tcconfig
 Before=dhcpcd.service
 After=systemd-rfkill.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/mv /boot/tc-config /home/thinclient/config
-ExecStartPost=/bin/chown thinclient:thinclient /home/thinclient/config
+ExecStart=/bin/mv /boot/tcconfig /home/thinclient/tcconfig
+ExecStartPost=/bin/chown thinclient:thinclient /home/thinclient/tcconfig
 
 [Install]
 WantedBy=multi-user.target
