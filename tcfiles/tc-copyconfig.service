@@ -7,8 +7,8 @@ After=systemd-rfkill.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/mv /boot/tc-config /home/pi/config
-ExecStartPost=/bin/chown pi:pi /home/pi/config
+ExecStart=/bin/mv /boot/tc-config /home/thinclient/config
+ExecStartPost=/bin/chown thinclient:thinclient /home/thinclient/config
 
 [Install]
 WantedBy=multi-user.target
