@@ -1,0 +1,136 @@
+# This file is copied to a new user's FVWM_USERDIR by FvwmForm-Setup form.
+# This file contains the commands fvwm reads while starting.
+#
+
+
+TitleStyle Height 17
+TitleStyle -- Flat
+TitleStyle (VGradient 128 2 royalblue1 50 royalblue2 50 royalblue1) -- Flat
+TitleStyle Inactive (VGradient 128 2 grey85 50 grey70 50 grey50) -- Flat
+
+ButtonStyle 1 (MiniIcon -- Flat)
+ButtonStyle 1 (VGradient 128 2 royalblue1 50 royalblue2 50 royalblue1)-- Flat
+ButtonStyle 1 Inactive (VGradient 128 2 grey85 50 grey70 50 grey50) -- Flat
+AddButtonStyle 1 ActiveDown (5 01x01@0 99x01@0 99x99@1 01x99@1 01x01@0)
+
+ButtonStyle 2 (VGradient 128 2 royalblue1 50 royalblue2 50 royalblue1)-- Flat
+ButtonStyle 2 Inactive (VGradient 128 2 grey85 50 grey70 50 grey50) -- Flat
+AddButtonStyle 2 ActiveUp (13 20x20@0 80x80@0 85x80@0 25x20@0 30x20@0 90x80@0 50x50@0 20x80@0 80x20@0 85x20@0 25x80@0 30x80@0 90x20@0) -- Flat
+AddButtonStyle 2 ActiveDown (13 20x20@1 80x80@1 85x80@1 25x20@1 30x20@1 90x80@1 50x50@1 20x80@1 80x20@1 85x20@1 25x80@1 30x80@1 90x20@1) -- Flat
+AddButtonStyle 2 Inactive (13 20x20@0 80x80@0 85x80@0 25x20@0 30x20@0 90x80@0 50x50@0 20x80@0 80x20@0 85x20@0 25x80@0 30x80@0 90x20@0) -- Flat
+
+ButtonStyle 6 (VGradient 128 2 royalblue1 50 royalblue2 50 royalblue1)-- Flat
+ButtonStyle 6 Inactive (VGradient 128 2 grey85 50 grey70 50 grey50) -- Flat
+AddButtonStyle 6 ActiveUp (4 25x80@0 85x80@0 85x75@0 25x75@0 25x70@0 85x70@0) -- Flat
+AddButtonStyle 6 ActiveDown (4 25x80@1 85x80@1 85x75@1 25x75@1 25x70@1 85x70@1) -- Flat
+AddButtonStyle 6 Inactive (4 25x80@0 85x80@0 85x75@0 25x75@0 25x70@0 85x70@0) -- Flat
+
+ButtonStyle 4 (VGradient 128 2 royalblue1 50 royalblue2 50 royalblue1)-- Flat
+ButtonStyle 4 Inactive (VGradient 128 2 grey85 50 grey70 50 grey50) -- Flat
+AddButtonStyle 4 ActiveUp (7 20x20@0 90x20@0 90x25@0 20x25@0 20x80@0 90x80@0 90x20@0) -- Flat
+AddButtonStyle 4 ActiveDown (7 20x20@1 90x20@1 90x25@1 20x25@1 20x80@1 90x80@1 90x20@1) -- Flat
+AddButtonStyle 4 Inactive (7 20x20@0 90x20@0 90x25@0 20x25@0 20x80@0 90x80@0 90x20@0) -- Flat
+
+MenuStyle * Foreground gray90, Background royalblue1, SeparatorsShort
+MenuStyle * Hilight3DOff, HilightBack royalblue2, ActiveFore gray17
+MenuStyle * Animation
+MenuStyle * Font lucidasans-14, PopupOffset 1 120
+MenuStyle * MenuFace VGradient 128 1 royalblue2 50 royalblue1 50 royalblue1
+
+BorderStyle -- HiddenHandles NoInset
+HilightColor gray17 royalblue3
+DeskTopSize 1x1
+
+Style "*"		BorderWidth 6, HandleWidth 4
+Style "*"		Color grey17/grey75
+Style "*"		NoPPosition
+Style "*"		ClickToFocus
+Style "*" ActivePlacement
+
+
+# Styles for various common programs:
+Style *lock       NoTitle, NoHandles, Sticky, WindowListSkip, ClickToFocus
+Style xbiff       NoTitle, Sticky, WindowListSkip, ClickToFocus
+Style xcalc       Icon xcalc.xpm, NoButton 2,ClickToFocus
+Style xmh         Icon mail1.xpm, NoIconTitle,StickyIcon
+Style xmh         NoButton 2
+Style xman        Icon xman.xpm, ClickToFocus
+Style xmag        Icon mag_glass.xpm, ClickToFocus
+Style xgraph      Icon graphs.xpm, ClickToFocus
+Style xmosaic     Color Green/Yellow, ClickToFocus
+
+
+# some simple default key bindings:
+Key Next         A       SCM     Next [*] Focus
+Key Prior        A       SCM     Prev [*] Focus
+
+# some simple default mouse bindings:
+#   for the root window:
+Mouse 1	R	A	Nop
+Mouse 2	R	A	WindowList
+Mouse 3	R	A	Menu MenuFvwmRoot Nop
+
+#   for the title bar buttons:
+Mouse 0	1	A	Menu MenuFvwmWindowOps2 Close
+Mouse 0	2	A	Delete
+Mouse 0	4	A	Maximize 100 97
+Mouse 0	6	A	Iconify
+
+
+#   for other parts of the window/borders/icons:
+Mouse 1	F	A	FuncFvwmResizeOrRaise
+Mouse 1	T	A	FuncFvwmMoveOrRaise
+Mouse 1	S	A	FuncFvwmResizeOrRaise
+Mouse 1	I	A	FuncFvwmMoveOrIconify
+Mouse 2	I	A	Iconify
+Mouse 3	TSIF	A	RaiseLower
+Mouse 3         TSIF    A       RaiseLower
+Mouse 2         T    A       WindowShade
+
+Style "*" PositionPlacement Center
+
+######################## Initialization Functions ############################
+AddToFunc StartFunction
++ I Module FvwmBacker
++ I exec thinclient
+
+######################## Menus ###################
+DestroyMenu MenuFvwmRoot
+AddToMenu MenuFvwmRoot  " User Friendly Thin Client by Henk.Tech    "             Title
++                       "&1. Thinclient GUI"             Exec thinclient
++                       ""              Nop
++                       "&R. Restart"          Exec systemctl reboot
++                       "&Q. Shutdown"          Exec systemctl poweroff
+
+
+######################## Sample Functions ##########################
+
+DestroyFunc FuncFvwmMoveOrRaise
+AddToFunc FuncFvwmMoveOrRaise
++ I Raise
++ M Move
++ D Lower
+
+DestroyFunc FuncFvwmMaximize
+AddToFunc FuncFvwmMaximize
++ M Maximize   0 100
++ H Maximize   0 100
++ C Maximize   0  80
++ D Maximize 100 100
+
+DestroyFunc FuncFvwmMoveOrIconify
+AddToFunc FuncFvwmMoveOrIconify
++ I Raise
++ M Move
++ D Iconify
+
+DestroyFunc FuncFvwmResizeOrRaise
+AddToFunc FuncFvwmResizeOrRaise
++ I Raise
++ M Resize
++ D Lower
+
+DestroyFunc FuncFvwmFocusPolicyChange
+AddToFunc FuncFvwmFocusPolicyChange
++ I Style * $0
++ I Recapture

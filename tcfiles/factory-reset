@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ "$EUID" -ne 0 ];then
+  rm ~/config
+  rm ~/session.log
+  rm ~/.xsession-errors
+  rm ~/.history
+  rm ~/.bash_history
+  rm ~/.Xauthority
+  rm -rf ~/.cache
+  rm -rf ~/.gnupg
+  history -c && history -w
+sudo factory-reset
+  exit
+fi
+set-hostname thinclient
+echo ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev > /etc/wpa_supplicant/wpa_supplicant.conf
+echo update_config=1 >> /etc/wpa_supplicant/wpa_supplicant.conf
+echo>>/etc/wpa_supplicant/wpa_supplicant.conf
+systemctl enable regenerate_ssh_host_keys
+systemctl poweroff
