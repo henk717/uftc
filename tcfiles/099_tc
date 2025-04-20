@@ -1,2 +1,3 @@
 # Allow any user to factory reset and set the hostname, this way it can be done by thin client admins without needing to know the image password
 ALL ALL=(ALL) NOPASSWD: /usr/bin/set-hostname
+ALL ALL=(ALL) NOPASSWD: /usr/bin/firstboot

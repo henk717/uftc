@@ -1,6 +1,10 @@
 #!/bin/bash
 # Thin Client RDP GUI by Henk717
 
+if [[ -f /usr/bin/firstboot ]]; then
+    xterm -e sudo /usr/bin/firstboot
+fi
+
 source ~/tcconfig
 oldhost=$(< /etc/hostname)
 if [[ $oldhost == "thinclient" || -f dynamic_hostname ]]; then

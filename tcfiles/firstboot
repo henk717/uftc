@@ -1,0 +1,5 @@
+#!/bin/bash
+echo Installing Thin Client, this will take a moment
+echo Some devices may only work after a reboot...
+update-initramfs -c -k all
+rm $0 && systemctl poweroff
