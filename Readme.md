@@ -40,16 +40,12 @@ Important: The modern kernel could not be included in the build process, boot yo
 
 This image is a direct drive image without an installer, you can directly flash it to the target media.
 For flashing on Windows Rufus is compatible and directly compatible with the .vhd format.
-On Linux dd is likely to be compatible, if not you can use qemu-img to convert it to a raw image.
+On Linux you can use ``qemu-img convert /location/of.vhd /dev/targetdevice``
 
 ### Installing on the target device
 
 Because we don't have an installer you have every possibility available for deployment that you'd like.
-One method is to use a Linux LiveCD with the qemu-utils package installed.
-The following command would write it to the first sata drive : qemu-img convert /location/of/vhd /dev/sda
-
-Another method is to flash it to a USB stick first, do your customizations and then use your usual backup / restore software.
-Deployments can be captured from any working machine at any time.
+The recommended method is using RescueZilla on a Ventoy USB stick, this will allow you to deploy the provided VHD image as well as capture your own.
 
 ### WiFi
 
