@@ -1,0 +1,130 @@
+#! /bin/bash
+
+if [[ $1 = "gui" ]]; then
+    MENU=$(
+        zenity --list \
+        --title="Automatic Maintainance (Updates / Cleaning)" \
+        --text="This program is a quick and easy way to automatically update your system." \
+        --column="Option" --column="Description" \
+        --width="570" \
+        --height="220" \
+        "Run" "Runs the updates and cleanup once" \
+        "Enable" "Enables Auto-Maintainance to keep your system up to date automatically" \
+        "Disable" "Disables Auto-Maintainance for manual updates" \
+        "Exit" "Goodbye!"
+    )
+
+    if [[ "$MENU" = "Run" ]] ;then
+        xterm -e $0
+    elif [[ "$MENU" = "Enable" ]] ;then
+        xterm -e $0 enable
+    elif [[ "$MENU" = "Disable" ]] ;then
+        xterm -e $0 disable
+    fi
+    exit 0
+fi
+
+# Ensure we're running as root
+if [[ "$(id -u)" != 0 ]]; then
+    sudo $0 $@
+    exit 1
+fi
+
+if [[ $1 = "enable" ]]; then
+if [[ ! -f /usr/bin/auto-maintainance ]]; then
+    echo auto-maintainance is not installed in the system, copying self to /usr/bin
+    cp $0 /usr/bin/auto-maintainance
+fi
+echo '[Unit]
+Description=Automatic Maintainance
+
+[Service]
+User=root
+Restart=always
+RestartSec=1800s
+ExecStart=/usr/bin/auto-maintainance
+
+[Install]
+WantedBy=multi-user.target' > /etc/systemd/system/auto-maintainance.service
+systemctl enable auto-maintainance
+echo Automatic Auto Maintainance will be enabled upon reboot.
+echo Use systemctl start auto-maintainance to start the service immediately.
+read -p "Press a key to continue"
+exit 0
+fi
+
+if [[ $1 = "disable" ]]; then
+systemctl stop auto-maintainance
+systemctl disable auto-maintainance
+rm /etc/systemd/system/auto-maintainance.service
+echo Automatic Auto Maintainance is now disabled.
+read -p "Press a key to continue"
+exit 0
+fi
+
+# Ensure we are not running in a Live Environment (That could make us run out of RAM on old ISO's).
+if grep -q "Live session" /etc/passwd; then
+	echo Auto Maintainance should not be performed on a Live Environment.
+	echo If you wish to manually install or update programs use Apt .
+	exit 1
+fi
+
+# NOTE: This script will ALWAYS keep the currently running kernel
+# NOTE: Default is to keep 2 more, user overrides with --keep N
+KEEP=2
+# NOTE: Any unrecognized option will be passed straight through to apt
+APT_OPTS=
+while [ ! -z "$1" ]; do
+	case "$1" in
+		--keep)
+			# User specified the number of kernels to keep
+			KEEP="$2"
+			shift 2
+		;;
+		*)
+			APT_OPTS="$APT_OPTS $1"
+			shift 1
+		;;
+	esac
+done
+
+# Build our list of kernel packages to purge
+CANDIDATES=$(ls -tr /boot/vmlinuz-* | head -n -${KEEP} | grep -v "$(uname -r)$" | cut -d- -f2- | awk '{print "linux-image-" $0 " linux-headers-" $0}' )
+for c in $CANDIDATES; do
+	dpkg-query -s "$c" >/dev/null 2>&1 && PURGE="$PURGE $c"
+done
+
+#Ensure we have the latest list of packages
+apt update
+
+#Fix broken dependencies and installations
+dpkg --configure -a
+DEBIAN_FRONTEND=noninteractive \
+  apt-get \
+  -o Dpkg::Options::=--force-confold \
+  -o Dpkg::Options::=--force-confdef \
+  -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+  install -f
+
+if [ ! -z "$PURGE" ]; then
+	apt $APT_OPTS remove -yq --purge $PURGE
+fi
+
+#Remove unrequired packages
+apt autoremove --purge -yq
+
+#Update the system using APT
+DEBIAN_FRONTEND=noninteractive \
+  apt-get \
+  -o Dpkg::Options::=--force-confold \
+  -o Dpkg::Options::=--force-confdef \
+  -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+  dist-upgrade
+
+#Update flatpak's and remove unused dependencies
+flatpak update -y
+flatpak uninstall --unused -y
+
+#Update and remove unused Snap's
+snap refresh
+snap list --all | while read snapname ver rev trk pub notes; do if [[ $notes = *disabled* ]]; then snap remove "$snapname" --revision="$rev"; fi; done

@@ -2,7 +2,7 @@
 # Thin Client RDP GUI by Henk717
 
 if [[ -f /usr/bin/firstboot ]]; then
-    xterm -e sudo /usr/bin/firstboot
+    xterm -bg black -fg white -e sudo /usr/bin/firstboot
 fi
 
 source ~/tcconfig
@@ -16,6 +16,7 @@ if [[ $oldhost == "thinclient" || -f dynamic_hostname ]]; then
 fi
 
 if [ -f ~/tcconfig ];then
+pamixer -u --allow-boost --set-volume $volume
 OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login" \
     --text="Enter your network credentials below" \
     --separator="," \
@@ -43,7 +44,7 @@ if [ "$password" = $adminpass"kill" ];then
 fi
 
 if [ "$password" = $adminpass"terminal" ];then
-    xterm
+    xterm -bg black -fg white
     $0
     exit 0
 fi
@@ -67,6 +68,7 @@ if [ "$password" = $adminpass"config" ];then
         --field="Server" "$server" \
         --field="Domain" "$domain" \
         --field="Parameters" "$param" \
+        --field="Speaker Volume" "$volume" \
         --field="Dialog Configuration":lbl --align=center "" \
         --field="Admin Password":h "$adminpass" \
         --field="Helpdesk Contact" "$helpdesk")
@@ -75,8 +77,9 @@ if [ "$password" = $adminpass"config" ];then
         echo server=\"$(awk -F, '{print $2}' <<<$OUTPUT)\" > ~/tcconfig
         echo domain=\"$(awk -F, '{print $3}' <<<$OUTPUT)\" >> ~/tcconfig
         echo param=\"$(awk -F, '{print $4}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo adminpass=\"$(awk -F, '{print $6}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo helpdesk=\"$(awk -F, '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo volume=\"$(awk -F, '{print $5}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo adminpass=\"$(awk -F, '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo helpdesk=\"$(awk -F, '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
     else
         yad --error --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi

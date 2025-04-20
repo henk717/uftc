@@ -1,5 +1,10 @@
 #!/bin/bash
-echo Installing Thin Client, this will take a moment
-echo Some devices may only work after a reboot...
+echo "Completing the final steps for the golden image."
+echo "Once finished the machine will turn off, please wait until this is complete."
+echo "If you see this and can not login after turning it back on contact the helpdesk."
 update-initramfs -c -k all
+wget -qO - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-archive-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org releases main' | sudo tee /etc/apt/sources.list.d/xanmod-release.list
+apt update && apt install linux-xanmod-lts-x64v1 -y
+set-hostname thinclient
 rm $0 && systemctl poweroff
