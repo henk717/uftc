@@ -19,7 +19,6 @@ RUN systemctl enable tc-copyconfig.service
 
 COPY tcfiles/tc-copywpa.service /etc/systemd/system/tc-copywpa.service
 RUN systemctl enable tc-copywpa.service
-RUN systemctl enable wpa_supplicant@wlan0
 
 COPY tcfiles/dhcp.network /etc/systemd/network/dhcp.network
 
