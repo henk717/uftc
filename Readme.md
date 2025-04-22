@@ -16,9 +16,10 @@ Super simple to setup, and easy for the end user.
 - Error messages that make sense and include your own helpdesk info, your users know exactly who to contact and what to say (Written by an experienced sysadmin who also does first line support).
 - Disk image that is not machine bound, you can capture it any time and redeploy your config on other machines. Hostnames change automatically based on the wired adapters mac address.
 - Optimized RDP defaults, rdp will just work out of the box with optimal quality. If you need to customize this further the option is available.
+- Based on the excellent xfreerdp project like most Linux based thinclients
 - Xanmod 6.12 Kernel for wide device compatibility
 - Docker as the build system making it easy to build your own custom image.
-- auto-maintainance command for system updates (Own risk especially on auto update mode, if a bad update releases and you enabled automatic updates you have to manually roll back your machines).
+- auto-maintenance command for system updates (Own risk especially on auto update mode, if a bad update releases and you enabled automatic updates you have to manually roll back your machines).
 - No external ports and minimal packages to reduce the attack surface even if the machine is outdated (The UI can be navigated easily over the phone, VNC is not neccesary. Instead if you need to assist users request remote access within the remote desktop.)
 
 ## Build your own image
@@ -55,12 +56,12 @@ Here is a template (Don't forget to change the country, I put china as the examp
 ```
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
-country=CNnetwork={
+country=CN
+network={
 	ssid="SSID GOES HERE"
 	psk="Password goes here"
 }
 ```
-
 
 ### Manual setup
 
@@ -72,7 +73,7 @@ The helpdesk field will be used in the middle of error message sentences, for ex
 ### Automatic setup
 
 Just like the WiFi the settings for the thinclient software can also be preconfigured by placing a tcconfig file in the boot partition.
-The template for this file is as follows:
+The template for this file is as follows (pay attention to the line endings, they need to be linux compatible):
 
 ```
 server=
@@ -81,14 +82,30 @@ param=
 volume=
 adminpass=
 helpdesk=
+config_url=
 ```
+
+### Remote Setup (Own risk)
+
+If a config_url is defined the thinclient will automatically download its config file every time the login screen is shown.
+As a safety measure the config is only written on a succesful download and the previous working URL is backed up to a seperate file (If your new location is succesful the old URL is overwritten).
+Should the config become corrupt the backuped up config URL can be used to recover functionality, there are cases where the incorrect URL can become permanent such as migrating your production thinclients to the configuration of your development environment as this sets a working config_url . To help minimize this risk its recommended not to specify a config_url in configurations that are not meant for production (Do not leave it empty as this will disable remote setup, remove the line entirely).
+
+Because of this and the inherent dangers of remote configuration ensure the config file webserver is well secured and the configuration files are well tested before mass deployment.
+Even though this functionality was exploit tested it is a possible point of failure if a hacker finds a novel bash exploit or overwrites the RDP server with a malicious one.
+
+tc_hostname in the URL is automatically replaced with the hostname of the thinclient to enable per client configuration.
+
+You implement this functionality strictly on your own risk. If left blank this functionality is fully disabled.
 
 ### Root Account
 
 In the release the root account is disabled with two exceptions that do not require a password:
-auto-maintainance (Own risk), this tool can be used to manually update the system or can be used to enable automatic updates.
+auto-maintenance (Own risk), this tool can be used to manually update the system or can be used to enable automatic updates.
 set-hostname , this tool changes the hostname of the thinclient. If the dynamic_hostname file is present in the user account hostnames will be set according to the macaddress of the wired adapter.
 (Likewise the thinclient account has no default password)
+
+When self building you can pass a -p parameter to enable the root password.
 
 ### Password commands
 
@@ -98,8 +115,8 @@ terminal: Open the terminal
 
 ping (without your admin password in front): Ping the RDP server with a full traceroute, users can change this to any required destination if needed.
 
-
 ## Terms of Use
+
 - I currently don't know which formal license is the best fit, when using this software please respect the following:
 - I am not responsible for what happens with your deployment, its designed to be as robust as I could make it. But should unforseen consequences, bugs or updates happen I am not liable as you accept you use and deploy this on your own risk especially if you enabled automatic updates and your company is now offline due to a bad/incompatible debian update.
 - The software is free for both personal and business use and may not be resold. Preinstallation on physical hardware is allowed as long as it is made clear that it runs software based on this free repository.

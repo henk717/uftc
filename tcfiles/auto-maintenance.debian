@@ -3,14 +3,14 @@
 if [[ $1 = "gui" ]]; then
     MENU=$(
         zenity --list \
-        --title="Automatic Maintainance (Updates / Cleaning)" \
+        --title="Automatic Maintenance (Updates / Cleaning)" \
         --text="This program is a quick and easy way to automatically update your system." \
         --column="Option" --column="Description" \
         --width="570" \
         --height="220" \
         "Run" "Runs the updates and cleanup once" \
-        "Enable" "Enables Auto-Maintainance to keep your system up to date automatically" \
-        "Disable" "Disables Auto-Maintainance for manual updates" \
+        "Enable" "Enables Auto-Maintenance to keep your system up to date automatically" \
+        "Disable" "Disables Auto-Maintenance for manual updates" \
         "Exit" "Goodbye!"
     )
 
@@ -31,40 +31,40 @@ if [[ "$(id -u)" != 0 ]]; then
 fi
 
 if [[ $1 = "enable" ]]; then
-if [[ ! -f /usr/bin/auto-maintainance ]]; then
-    echo auto-maintainance is not installed in the system, copying self to /usr/bin
-    cp $0 /usr/bin/auto-maintainance
+if [[ ! -f /usr/bin/auto-maintenance ]]; then
+    echo auto-maintenance is not installed in the system, copying self to /usr/bin
+    cp $0 /usr/bin/auto-maintenance
 fi
 echo '[Unit]
-Description=Automatic Maintainance
+Description=Automatic Maintenance
 
 [Service]
 User=root
 Restart=always
 RestartSec=1800s
-ExecStart=/usr/bin/auto-maintainance
+ExecStart=/usr/bin/auto-maintenance
 
 [Install]
-WantedBy=multi-user.target' > /etc/systemd/system/auto-maintainance.service
-systemctl enable auto-maintainance
-echo Automatic Auto Maintainance will be enabled upon reboot.
-echo Use systemctl start auto-maintainance to start the service immediately.
+WantedBy=multi-user.target' > /etc/systemd/system/auto-maintenance.service
+systemctl enable auto-maintenance
+echo Automatic Auto Maintenance will be enabled upon reboot.
+echo Use systemctl start auto-maintenance to start the service immediately.
 read -p "Press a key to continue"
 exit 0
 fi
 
 if [[ $1 = "disable" ]]; then
-systemctl stop auto-maintainance
-systemctl disable auto-maintainance
-rm /etc/systemd/system/auto-maintainance.service
-echo Automatic Auto Maintainance is now disabled.
+systemctl stop auto-maintenance
+systemctl disable auto-maintenance
+rm /etc/systemd/system/auto-maintenance.service
+echo Automatic Auto Maintenance is now disabled.
 read -p "Press a key to continue"
 exit 0
 fi
 
 # Ensure we are not running in a Live Environment (That could make us run out of RAM on old ISO's).
 if grep -q "Live session" /etc/passwd; then
-	echo Auto Maintainance should not be performed on a Live Environment.
+	echo Auto Maintenance should not be performed on a Live Environment.
 	echo If you wish to manually install or update programs use Apt .
 	exit 1
 fi

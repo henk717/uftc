@@ -1,42 +1,106 @@
 #!/bin/bash
 # Thin Client RDP GUI by Henk717
 
+# Run second phase of the build if present
 if [[ -f /usr/bin/firstboot ]]; then
     xterm -bg black -fg white -e sudo /usr/bin/firstboot
 fi
 
-source ~/tcconfig
-oldhost=$(< /etc/hostname)
-if [[ $oldhost == "thinclient" || -f dynamic_hostname ]]; then
+# Rename thinclient
+hostname=$(< /etc/hostname)
+if [[ $hostname == "thinclient" || -f dynamic_hostname ]]; then
     read newhost </sys/class/net/eth0/address
     newhost=TC-${newhost//[:]/}
-    if [[ "$oldhost" != "$newhost" ]]; then
+    if [[ "$hostname" != "$newhost" ]]; then
         sudo set-hostname $newhost
+        hostname=$newhost
     fi
 fi
 
-if [ -f ~/tcconfig ];then
-pamixer -u --allow-boost --set-volume $volume
-OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login" \
-    --text="Enter your network credentials below" \
-    --separator="," \
-    --field="Username" \
-    --field="Password":h)
-OUTPUT_RESULTS=$?
-if ((OUTPUT_RESULTS != 0)); then
-    echo "Shutdown requested.."
-    if [ -f "desktop" ]; then
-    echo Desktop file exists, not shutting the whole PC down...
-    exit
+load_config ()
+{
+    if [[ -f "$1" ]]; then
+        while IFS='=' read -r key value || [[ -n "$key" ]]; do
+            # Ignore empty lines and comments
+            [[ -z "$key" || "$key" =~ ^# ]] && continue
+            
+            # Ensure the key is a valid variable name and replace hostname if needed
+            if [[ "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+                # Replace tchostname with the up to date hostname
+                value=${value/tc_hostname/"$hostname"}
+
+                # Remove quotes to mimic source behavior
+                value="${value#\"}"  # Strip leading quote
+                value="${value%\"}"  # Strip trailing quote
+
+                # Assign only if value is not empty
+                if [[ -n "$value" ]]; then
+                    export "$key=$value"
+                else
+                    unset "$key"
+                fi
+            else
+                echo "Skipping potentially unsafe entry: $key"
+            fi
+        done < "$1"
     else
-    systemctl poweroff
+        echo "$1 does not exist, ignoring import"
     fi
-    $0 "$@" &
-    exit
-fi
-Blank=""
-username=$(awk -F, '{print $1}' <<<$OUTPUT)
-password=$(awk -F, '{print $2}' <<<$OUTPUT)
+}
+
+if [ -f ~/tcconfig ];then
+    load_config ~/config_url
+    load_config ~/tcconfig
+
+    if [[ $config_url ]]; then
+        config_url_invalid="$config_url"
+        curl -fLo ~/tcconfig $config_url
+        # If downloads fail we try the last successful one just in case someone made a typo, if its successful we backup the working URL
+        if [ $? -ne 0 ]; then
+            echo "Download failed, trying backup URL"
+            load_config ~/config_url
+            curl -fLo ~/tcconfig $config_url
+            config_url="Config URL $config_url_invalid failed to download, the above settings are from a backup."  # This was a dilemma since it can pick either one from the file depending on external servers, lets just warn instead. In an automatic scenario this is not saved, even if the admin ends up saving this the backup URL should revert it again.
+        else
+            # Double check what we received has a config_url before replacing our known one
+            if grep -F "config_url=" ~/tcconfig ;then
+                echo "Valid config received, updating config_url"
+                echo config_url=$config_url > ~/config_url
+                # Quick reload in case things changed, spares the user the reboot
+                load_config ~/tcconfig
+            else
+                # Something didn't go right and we did not use the new URL successfully
+                load_config ~/config_url
+                curl -fLo ~/tcconfig $config_url
+                load_config ~/tcconfig
+                if [ "$config_url_invalid" == "$config_url" ]; then
+                    config_url="Config URL $config_url_invalid was invalid and a backup was used." # This was a dilemma since it can pick either one from the file depending on external servers, lets just warn instead. In an automatic scenario this is not saved, even if the admin ends up saving this the backup URL should revert it again.
+                fi
+            fi
+        fi
+    fi
+
+    pamixer -u --allow-boost --set-volume $volume
+    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login" \
+        --text="Enter your network credentials below" \
+        --separator="," \
+        --field="Username" \
+        --field="Password":h)
+    OUTPUT_RESULTS=$?
+    if ((OUTPUT_RESULTS != 0)); then
+        echo "Shutdown requested.."
+            if [ -f "desktop" ]; then
+            echo Desktop file exists, not shutting the whole PC down...
+            exit
+        else
+            systemctl poweroff
+        fi
+        $0 "$@" &
+        exit
+    fi
+    Blank=""
+    username=$(awk -F, '{print $1}' <<<$OUTPUT)
+    password=$(awk -F, '{print $2}' <<<$OUTPUT)
 fi
 
 if [ "$password" = $adminpass"kill" ];then
@@ -55,7 +119,7 @@ if [ "$password" = "ping" ];then
     exit 0
 fi
 
-if [ -z "$server" ];then
+if [ ! -f ~/tcconfig ];then
 yad --info --ellipsize=middle --title="User Friendly Thin Client by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the login password.\nYou can also use the login password terminal to access the terminal.\n\nNOTE: If you enter an admin password you will need to type this in front of the commands,\nthis version stores that password in plain text so do not submit your usual administrator passwords.\n\nCommands:\nconfig: Configuration screen\nterminal: Interactive Terminal\nping (Without password): My Traceroute\nkill: Shut down this tool"
 password=config
 fi
@@ -71,7 +135,8 @@ if [ "$password" = $adminpass"config" ];then
         --field="Speaker Volume" "$volume" \
         --field="Dialog Configuration":lbl --align=center "" \
         --field="Admin Password":h "$adminpass" \
-        --field="Helpdesk Contact" "$helpdesk")
+        --field="Helpdesk Contact" "$helpdesk" \
+        --field="Remote Config Location" "$config_url" )
     OUTPUT_RESULTS=$?
     if ((OUTPUT_RESULTS == 0)); then
         echo server=\"$(awk -F, '{print $2}' <<<$OUTPUT)\" > ~/tcconfig
@@ -80,31 +145,33 @@ if [ "$password" = $adminpass"config" ];then
         echo volume=\"$(awk -F, '{print $5}' <<<$OUTPUT)\" >> ~/tcconfig
         echo adminpass=\"$(awk -F, '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
         echo helpdesk=\"$(awk -F, '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo config_url=\"$(awk -F, '{print $9}' <<<$OUTPUT)\" >> ~/tcconfig
     else
-        yad --error --center --ellipsize=middle --text="Configuration cancelled or failed"
+        yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
     $0 "$@" &
     exit 0
 fi
 
 echo "Start of session" > session.log
-WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp /v:$server /d:$domain /u:$username /p:$password /multimon /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param
+WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp /v:$server /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param
 if ! grep -F "BY_USER" session.log;then
-grep -F "ERRCONNECT_LOGON_FAILURE" session.log && yad --error --center --ellipsize=middle --text="Your Login has failed.\nPlease try again."
-grep -F "ERRCONNECT_WRONG_PASSWORD" session.log && yad --error --center --ellipsize=middle --text="You have entered incorrect login information.\nPlease try again."
-grep -F "ERRCONNECT_CONNECT_FAILED" session.log && yad --error --center --ellipsize=middle --text="We could not establish a connection with the server, restart this device and contact $helpdesk if the issue persists."
-grep -F "ERRCONNECT_AUTHENTICATION_FAILED" session.log && yad --error --center --ellipsize=middle --text="The server was unable to verify your credentials.\nIf you still experience this error after 10 minutes please contact $helpdesk."
-grep -F "ERRCONNECT_CONNECT_TRANSPORT_FAILED" session.log && yad --error --center --ellipsize=middle --text="We have encountered a server issue.\nThis can have the following causes.\n\nThe server is unable to take your connection at this time.\nYour account does not have permissions to access the server but was not locked out.\nThe server $server is not the correct server.\nThere was another issue on this machine or network that prevented the connection from succeeding.\n\nPlease reboot the machine, if you are still unable to login after this contact $helpdesk"
-grep -F "ERRCONNECT_PASSWORD_MUST_CHANGE" session.log && yad --error --center --ellipsize=middle --text="Your password has expired and needs to be changed, please contact $helpdesk for assistance."
-grep -F "ERRCONNECT_ACCOUNT_DISABLED" session.log && yad --error --center --ellipsize=middle --text="You can not login with this account.\nContact $helpdesk for more information."
-grep -F "ERRCONNECT_ACCOUNT_LOCKED_OUT" session.log && yad --error --center --ellipsize=middle --text="Your account has been locked out because of to many failed attempts, please contact $helpdesk and ask for an account unlock (Accounts may unlock automatically after enough time has passed)."
-grep -F "ERRCONNECT_ACCOUNT_RESTRICTION" session.log && yad --error --center --ellipsize=middle --text="You are unable to login because of an account restriction.\nFor example you may not be allowed to login at this time.\nPlease contact $helpdesk for more information."
-grep -F "ERRINFO_SERVER" session.log && yad --error --center --ellipsize=middle --text="Server connection failed.\nPlease try again, restart the device and otherwise contact $helpdesk for assistance."
-grep -F "ERRINFO_LICENSE" session.log && yad --error --center --ellipsize=middle --text="To many accounts are currently logged in.\n Please inform $helpdesk ."
-grep -F "ERRINFO_OUT_OF_MEMORY" session.log && yad --error --center --ellipsize=middle --text="The server ran out of memory.\n Please inform $helpdesk ."
-grep -F "ERRINFO_CB_DESTINATION_NOT_FOUND" session.log && yad --error --center --ellipsize=middle --text="The server could not be reached, restart this device and contact $helpdesk if the issue persists."
-grep -F "ERRINFO_CB_DESTINATION_POOL_NOT_FREE" session.log && yad --error --center --ellipsize=middle --text="The server did not have a session available for you.\nTry again in 10 minutes and contact $helpdesk if the issue persists."
-grep -F "ERRINFO_CB_CONNECTION_ERROR_INVALID_SETTINGS" session.log && yad --error --center --ellipsize=middle --text="Invalid settings.\n Please contact $helpdesk and inform them the settings used are \n$server\n$param."
+grep -F "ERRCONNECT_LOGON_FAILURE" session.log && yad --error --title="Error" --center --ellipsize=middle --text="The Login attempt has failed.\nPlease try again or contact $helpdesk if the issue persists."
+grep -F "ERRCONNECT_WRONG_PASSWORD" session.log && yad --error --title="Error" --center --ellipsize=middle --text="You have entered incorrect login information.\nPlease try again."
+grep -F "ERRCONNECT_CONNECT_FAILED" session.log && yad --error --title="Error" --center --ellipsize=middle --text="We could not establish a connection with the server $server, restart this device and contact $helpdesk if the issue persists after 5 minutes."
+grep -F "ERRCONNECT_DNS_NAME_NOT_FOUND" session.log && yad --error --title="Error" --center --ellipsize=middle --text="We could not find a server called $server, restart this device and contact $helpdesk if the issue persists after 5 minutes."
+grep -F "ERRCONNECT_AUTHENTICATION_FAILED" session.log && yad --error --title="Error" --center --ellipsize=middle --text="The server was unable to verify your credentials.\nIf you still experience this error after 10 minutes please contact $helpdesk."
+grep -F "ERRCONNECT_CONNECT_TRANSPORT_FAILED" session.log && yad --error --title="Error" --center --ellipsize=middle --text="We have encountered a server issue.\nThis can have the following causes.\n\nThe server is unable to take your connection at this time.\nYour account does not have permissions to access the server but was not locked out.\nThe server $server is not the correct server.\nThere was another issue on this machine or network that prevented the connection from succeeding.\n\nPlease reboot the machine, if you are still unable to login after this contact $helpdesk"
+grep -F "ERRCONNECT_PASSWORD_MUST_CHANGE" session.log && yad --error --title="Error" --center --ellipsize=middle --text="Your password has expired and needs to be changed, please contact $helpdesk for assistance."
+grep -F "ERRCONNECT_ACCOUNT_DISABLED" session.log && yad --error --title="Error" --center --ellipsize=middle --text="You can not login with this account.\nContact $helpdesk for more information."
+grep -F "ERRCONNECT_ACCOUNT_LOCKED_OUT" session.log && yad --error --title="Error" --center --ellipsize=middle --text="Your account has been locked out because of to many failed attempts, please contact $helpdesk and ask for an account unlock (Accounts may unlock automatically after enough time has passed)."
+grep -F "ERRCONNECT_ACCOUNT_RESTRICTION" session.log && yad --error --title="Error" --center --ellipsize=middle --text="You are unable to login because of an account restriction.\nFor example you may not be allowed to login at this hour or day.\nPlease contact $helpdesk for more information."
+grep -F "ERRINFO_SERVER" session.log && yad --error --title="Error" --center --ellipsize=middle --text="Server connection failed.\nPlease try again, restart the device and otherwise contact $helpdesk for assistance."
+grep -F "ERRINFO_LICENSE" session.log && yad --error --title="Error" --center --ellipsize=middle --text="To many accounts are currently logged in.\n Please inform $helpdesk ."
+grep -F "ERRINFO_OUT_OF_MEMORY" session.log && yad --error --title="Error" --center --ellipsize=middle --text="The server $server ran out of memory.\n Please inform $helpdesk ."
+grep -F "ERRINFO_CB_DESTINATION_NOT_FOUND" session.log && yad --error --title="Error" --center --ellipsize=middle --text="The server $server could not be reached, restart this device and contact $helpdesk if the issue persists."
+grep -F "ERRINFO_CB_DESTINATION_POOL_NOT_FREE" session.log && yad --error --title="Error" --center --ellipsize=middle --text="The server $server did not have a session available for you.\nTry again in 10 minutes and contact $helpdesk if the issue persists."
+grep -F "ERRINFO_CB_CONNECTION_ERROR_INVALID_SETTINGS" session.log && yad --error --title="Error" --center --ellipsize=middle --text="Invalid settings.\n Please contact $helpdesk and inform them the settings used are \n$server\n$param."
 fi
 
 password=""
