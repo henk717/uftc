@@ -81,6 +81,23 @@ if [ -f ~/tcconfig ];then
     fi
 
     pamixer -u --allow-boost --set-volume $volume
+
+    if [ "$server" = "citrix" ];then
+        yad --center --title=Loading --button="Please wait" --timeout=1
+        if [ "$?" == "70" ];then
+            if [ -f /opt/Citrix/ICAClient/selfservice ];then
+                /opt/Citrix/ICAClient/selfservice
+                echo "Shutdown requested.."
+                if [ -f "desktop" ]; then
+                    echo Desktop file exists, not shutting the whole PC down...
+                    exit
+                else
+                    systemctl poweroff
+                fi
+            fi
+        fi
+    fi
+
     OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login" \
         --text="Enter your network credentials below" \
         --separator="," \
@@ -154,7 +171,10 @@ if [ "$password" = $adminpass"config" ];then
 fi
 
 echo "Start of session" > session.log
-WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp /v:$server /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param
+if [ "$server" != "citrix" ];then
+    WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp /v:$server /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param
+fi
+
 if ! grep -F "BY_USER" session.log;then
 grep -F "ERRCONNECT_LOGON_FAILURE" session.log && yad --error --title="Error" --center --ellipsize=middle --text="The Login attempt has failed.\nPlease try again or contact $helpdesk if the issue persists."
 grep -F "ERRCONNECT_WRONG_PASSWORD" session.log && yad --error --title="Error" --center --ellipsize=middle --text="You have entered incorrect login information.\nPlease try again."
