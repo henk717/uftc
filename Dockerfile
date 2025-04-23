@@ -26,8 +26,8 @@ RUN useradd -ms /bin/bash thinclient
 COPY tcfiles/.fvwm /home/thinclient/.fvwm
 COPY tcfiles/bashrc /home/thinclient/.bashrc
 
-COPY icaclient_* /tmp/icaclient.deb
-RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
+COPY icaclient_* /tmp/
+RUN apt install /tmp/icaclient_* -y && rm /tmp/icaclient_* || true
 
 USER thinclient
 WORKDIR /home/thinclient
