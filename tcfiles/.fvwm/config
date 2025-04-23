@@ -74,7 +74,6 @@ Mouse 3	R	A	Menu MenuFvwmRoot Nop
 Mouse 0	1	A	Menu MenuFvwmWindowOps2 Close
 Mouse 0	2	A	Delete
 Mouse 0	4	A	Maximize 100 97
-Mouse 0	6	A	Iconify
 
 
 #   for other parts of the window/borders/icons:
