@@ -98,6 +98,10 @@ tc_hostname in the URL is automatically replaced with the hostname of the thincl
 
 You implement this functionality strictly on your own risk. If left blank this functionality is fully disabled.
 
+### Citrix Mode
+
+There is a basic Citrix mode on board that can be activated by putting citrix as the server name. Citrix currently needs to be manually configured.
+
 ### Root Account
 
 In the release the root account is disabled with two exceptions that do not require a password:
