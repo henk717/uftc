@@ -1,6 +1,8 @@
 #!/bin/bash
 # Thin Client RDP GUI by Henk717
 
+PROTOCOL_DETECT="://"
+
 # Run second phase of the build if present
 if [[ -f /usr/bin/firstboot ]]; then
     xterm -bg black -fg white -e sudo /usr/bin/firstboot
@@ -98,6 +100,14 @@ if [ -f ~/tcconfig ];then
         fi
     fi
 
+    # RDP File support, this will break the server string for the other modes so we do it last
+    if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
+        curl -fLo ~/destination.rdp "$server"
+        server="~/destination.rdp"
+    else
+        server="/v:"$server      
+    fi
+
     OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login" \
         --text="Enter your network credentials below" \
         --separator="," \
@@ -172,7 +182,7 @@ fi
 
 echo "Start of session" > session.log
 if [ "$server" != "citrix" ];then
-    WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp /v:$server /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param
+    WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp $server /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param
 fi
 
 if ! grep -F "BY_USER" session.log;then

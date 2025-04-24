@@ -98,6 +98,11 @@ tc_hostname in the URL is automatically replaced with the hostname of the thincl
 
 You implement this functionality strictly on your own risk. If left blank this functionality is fully disabled.
 
+### RDP Files
+
+Some functionality such as connecting to a connection broker collection can only be achieved trough .rdp files just like mstsc on Windows.
+To make this possible you can choose to use a download link for the RDP file as the server name.
+
 ### Citrix Mode
 
 There is a basic Citrix mode on board that can be activated by putting citrix as the server name. Citrix currently needs to be manually configured.
