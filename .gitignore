@@ -1,3 +1,4 @@
 session.log
 *.vhd
-icaclient_*
+*.deb
+*.Identifier

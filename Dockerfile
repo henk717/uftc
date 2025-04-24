@@ -25,9 +25,11 @@ COPY tcfiles/dhcp.network /etc/systemd/network/dhcp.network
 RUN useradd -ms /bin/bash thinclient
 COPY tcfiles/.fvwm /home/thinclient/.fvwm
 COPY tcfiles/bashrc /home/thinclient/.bashrc
+# Block stock files from being tampered with to harden even more
+RUN chown -R root:thinclient /home/thinclient/ && chmod 1775 /home/thinclient/
 
-COPY icaclient_* /tmp/
-RUN apt install /tmp/icaclient_* -y && rm /tmp/icaclient_* || true
+COPY icaclient.deb* /tmp/
+RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
 
 USER thinclient
 WORKDIR /home/thinclient
