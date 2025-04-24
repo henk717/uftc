@@ -103,9 +103,9 @@ if [ -f ~/tcconfig ];then
     # RDP File support, this will break the server string for the other modes so we do it last
     if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
         curl -fLo ~/destination.rdp "$server"
-        server="~/destination.rdp"
+        rdp_destination="~/destination.rdp"
     else
-        server="/v:"$server
+        rdp_destination="/v:"$server
     fi
 
     OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login" \
@@ -182,12 +182,7 @@ fi
 
 echo "Start of session" > session.log
 if [ "$server" != "citrix" ];then
-    bash -c "WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp $server /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param" # Somehow this only works when wrapped in bash otherwise it cant understand the positional argument
-    if [ $server == "~/destination.rdp" ]; then
-        server="" # Cleanup server file name from the errors
-    else
-        server=${server#*:} # Cleanup /v: from the error logs
-    fi
+    bash -c "WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp $rdp_destination /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /microphone /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport +gfx-progressive $param" # Somehow this only works when wrapped in bash otherwise it cant understand the positional argument
 fi
 
 if ! grep -F "BY_USER" session.log;then
