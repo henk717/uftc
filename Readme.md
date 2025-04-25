@@ -20,7 +20,7 @@ Super simple to setup, and easy for the end user.
 - Xanmod 6.12 Kernel for wide device compatibility
 - Docker as the build system making it easy to build your own custom image.
 - auto-maintenance command for system updates (Own risk especially on auto update mode, if a bad update releases and you enabled automatic updates you have to manually roll back your machines).
-- No external ports and minimal packages to reduce the attack surface even if the machine is outdated (The UI can be navigated easily over the phone, VNC is not neccesary. Instead if you need to assist users request remote access within the remote desktop.)
+- No remote access ports and minimal packages to reduce the attack surface even if the machine is outdated (The UI can be navigated easily over the phone, VNC is not neccesary. Instead if you need to assist users request remote access within the remote desktop.)
 
 ## Build your own image
 
@@ -123,6 +123,8 @@ config : Re-open the config dialogue
 terminal: Open the terminal
 
 ping (without your admin password in front): Ping the RDP server with a full traceroute, users can change this to any required destination if needed.
+
+ip (without your admin password in front): Shows the devices network information
 
 ## Terms of Use
 
