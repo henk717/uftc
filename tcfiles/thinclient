@@ -156,7 +156,7 @@ if [ "$password" = "ping" ];then
 fi
 
 if [ "$password" = "ip" ];then
-    yad --title="Network Information" --text="Hostname: $hostname\nLocal IP: $(hostname --all-ip-addresses || hostname -I)\nPublic IP: $(curl -4 ifconfig.me)\n$(resolvectl status | grep "DNS Servers" | sed -e 's/^[ \t]*//')\nGateway: $(ip route | awk '/default/ { print $3 }')" --button="Ok"
+    yad --title="Network Information"  --center --text="Hostname: $hostname\nLocal IP: $(hostname --all-ip-addresses || hostname -I)\nPublic IP: $(curl -4 ifconfig.me)\n$(resolvectl status | grep "DNS Servers" | sed -e 's/^[ \t]*//')\nGateway: $(ip route | awk '/default/ { print $3 }')" --button="Ok"
     $0
     exit 0
 fi
