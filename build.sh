@@ -1,0 +1,1 @@
+sudo ./d2vm build . -o uftc.vhd --bootloader grub --boot-size 4000 --size 14G
