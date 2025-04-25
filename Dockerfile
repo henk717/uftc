@@ -22,6 +22,8 @@ RUN systemctl enable tc-copywpa.service
 
 COPY tcfiles/dhcp.network /etc/systemd/network/dhcp.network
 
+COPY tcfiles/xorg.conf /etc/X11/xorg.conf.d/thinclient.conf
+
 RUN useradd -ms /bin/bash thinclient
 COPY tcfiles/.fvwm /home/thinclient/.fvwm
 COPY tcfiles/bashrc /home/thinclient/.bashrc
