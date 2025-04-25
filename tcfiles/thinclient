@@ -2,6 +2,7 @@
 # Thin Client RDP GUI by Henk717
 
 PROTOCOL_DETECT="://"
+VERSION=`cat /tcversion`
 
 # Run second phase of the build if present
 if [[ -f /usr/bin/firstboot ]]; then
@@ -11,8 +12,16 @@ fi
 # Rename thinclient
 hostname=$(< /etc/hostname)
 if [[ $hostname == "thinclient" || -f dynamic_hostname ]]; then
-    read newhost </sys/class/net/eth0/address
-    newhost=TC-${newhost//[:]/}
+    if [ -f /sys/class/net/eth0/address ];then
+        read newhost </sys/class/net/eth0/address
+        newhost=TC-${newhost//[:]/}
+    elif [ -f /sys/class/net/wlan0/address ];then
+        read newhost </sys/class/net/wlan0/address
+        newhost=TC-${newhost//[:]/}
+    else
+        newhost="thinclient"
+    fi
+
     if [[ "$hostname" != "$newhost" ]]; then
         sudo set-hostname $newhost
         hostname=$newhost
@@ -108,7 +117,7 @@ if [ -f ~/tcconfig ];then
         rdp_destination="/v:"$server
     fi
 
-    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login" \
+    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login | $VERSION" \
         --text="Enter your network credentials below" \
         --separator="," \
         --field="Username" \
@@ -147,12 +156,12 @@ if [ "$password" = "ping" ];then
 fi
 
 if [ ! -f ~/tcconfig ];then
-yad --info --ellipsize=middle --title="User Friendly Thin Client by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the login password.\nYou can also use the login password terminal to access the terminal.\n\nNOTE: If you enter an admin password you will need to type this in front of the commands,\nthis version stores that password in plain text so do not submit your usual administrator passwords.\n\nCommands:\nconfig: Configuration screen\nterminal: Interactive Terminal\nping (Without password): My Traceroute\nkill: Shut down this tool"
+yad --info --ellipsize=middle --title="User Friendly Thin Client $VERSION by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the login password.\nYou can also use the login password terminal to access the terminal.\n\nNOTE: If you enter an admin password you will need to type this in front of the commands,\nthis version stores that password in plain text so do not submit your usual administrator passwords.\n\nCommands:\nconfig: Configuration screen\nterminal: Interactive Terminal\nping (Without password): My Traceroute\nkill: Shut down this tool"
 password=config
 fi
 
 if [ "$password" = $adminpass"config" ];then
-    OUTPUT=$(yad --form --center --window-icon=changes-allow --image=preferences-system --title="Configuration Utility" \
+    OUTPUT=$(yad --form --center --window-icon=changes-allow --image=preferences-system --title="Configuration Utility | $VERSION" \
         --text="This will replace the configuration file with the provided settings" \
         --separator="," \
         --field="RDP Configuration":lbl --align=center "" \
