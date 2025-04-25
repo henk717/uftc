@@ -27,7 +27,7 @@ Super simple to setup, and easy for the end user.
 Image building requires docker and can be done inside of WSL2 if desired.
 
 ```
-./d2vm build . -o uftc.vhd --bootloader grub --boot-size 4000 --size 14G 
+./build.sh
 ```
 
 grub as the bootloader unlocks a few things most importantly uefi support, you also get a seperate fat32 boot partition where you can place the config files when provisioning.
