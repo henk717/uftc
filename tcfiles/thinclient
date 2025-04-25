@@ -155,8 +155,14 @@ if [ "$password" = "ping" ];then
     exit 0
 fi
 
+if [ "$password" = "ip" ];then
+    yad --title="Network Information" --text="Hostname: $hostname\nLocal IP: $(hostname --all-ip-addresses || hostname -I)\nPublic IP: $(curl -4 ifconfig.me)\n$(resolvectl status | grep "DNS Servers" | sed -e 's/^[ \t]*//')\nGateway: $(ip route | awk '/default/ { print $3 }')" --button="Ok"
+    $0
+    exit 0
+fi
+
 if [ ! -f ~/tcconfig ];then
-yad --info --ellipsize=middle --title="User Friendly Thin Client $VERSION by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the login password.\nYou can also use the login password terminal to access the terminal.\n\nNOTE: If you enter an admin password you will need to type this in front of the commands,\nthis version stores that password in plain text so do not submit your usual administrator passwords.\n\nCommands:\nconfig: Configuration screen\nterminal: Interactive Terminal\nping (Without password): My Traceroute\nkill: Shut down this tool"
+yad --info --ellipsize=middle --center --title="User Friendly Thin Client $VERSION by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the login password.\nYou can also use the login password terminal to access the terminal.\n\nNOTE: If you enter an admin password you will need to type this in front of the commands,\nthis version stores that password in plain text so do not submit your usual administrator passwords.\n\nCommands:\nconfig: Configuration screen\nterminal: Interactive Terminal\nping (Without password): My Traceroute\nip (Without password): Show IP information\nkill: Shut down this tool"
 password=config
 fi
 
