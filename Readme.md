@@ -1,5 +1,7 @@
 # User Friendly ThinClient
 
+![UFTC Login Screen](login.png)
+
 UFTC was born out of my passion for IT, I have always wanted the ability to have thin clients in my home lab yet nothing online I could use for free was what I wanted.
 Many organizations I supported across IT departments always wanted the same thing, a lightweight locked down thinclient with a simple login screen.
 
@@ -45,8 +47,8 @@ On Linux you can use ``qemu-img convert /location/of.vhd /dev/targetdevice``
 
 ### Installing on the target device
 
-Because we don't have an installer you have every possibility available for deployment that you'd like.
-The recommended method is using RescueZilla on a Ventoy USB stick, this will allow you to deploy the provided VHD image as well as capture your own.
+Because we don't have a mandatory installer you have every possibility available for deployment that you'd like.
+The recommended method is using RescueZilla on a Ventoy USB stick, this will allow you to deploy the provided VHD image as well as capture your own. If you prefer a more traditional install an ISO is available.
 
 ### WiFi
 
