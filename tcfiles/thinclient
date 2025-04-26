@@ -150,7 +150,11 @@ if [ "$password" = $adminpass"terminal" ];then
 fi
 
 if [ "$password" = "ping" ];then
-    mtr $server
+    if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
+        mtr $(cat ~/destination.rdp | grep "full address:s:" | sed 's/full address:s://g' | tr -d '\r' | tr -d '\n')
+    else
+        mtr $server
+    fi
     $0
     exit 0
 fi
