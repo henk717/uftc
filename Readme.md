@@ -107,7 +107,7 @@ To make this possible you can choose to use a download link for the RDP file as 
 
 ### Citrix Mode
 
-There is a basic Citrix mode on board that can be activated by putting citrix as the server name. Citrix currently needs to be manually configured.
+There is a basic Citrix mode on board that can be activated by putting citrix as the server name. The URL of the Citrix Storefront can be preconfigured by putting it in the parameters, each time this setting changes to a new URL the Citrix profile is wiped.
 
 ### Root Account
 

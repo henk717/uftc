@@ -97,6 +97,17 @@ if [ -f ~/tcconfig ];then
         yad --center --title=Loading --button="Please wait" --timeout=1
         if [ "$?" == "70" ];then
             if [ -f /opt/Citrix/ICAClient/selfservice ];then
+                if [[ -n "$param" && "$(cat ~/.ICAClient/param)" != "$param" ]]; then
+                    echo Store URL incorrect, trying to reconfigure
+                    rm -rf ~/.ICAClient
+                    /opt/Citrix/ICAClient/util/storebrowse -a "$param" && echo $param > ~/.ICAClient/param
+                    if [ ! -f ~/.ICAClient/param ];then
+                        echo "Something went wrong, we have no configuration. Restarting..."
+                        $0 "$@" &
+                        exit
+                    fi
+                fi
+                /opt/Citrix/ICAClient/util/storebrowse -c SharedUserMode=True
                 /opt/Citrix/ICAClient/selfservice
                 echo "Shutdown requested.."
                 if [ -f "desktop" ]; then
