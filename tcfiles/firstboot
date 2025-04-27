@@ -6,5 +6,6 @@ update-initramfs -c -k all
 wget -qO - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-archive-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org releases main' | sudo tee /etc/apt/sources.list.d/xanmod-release.list
 apt update && apt install linux-xanmod-lts-x64v1 -y
+setcap cap_net_raw+ep /usr/bin/mtr-packet
 set-hostname thinclient
 rm $0 && systemctl poweroff

@@ -2,7 +2,7 @@
 
 if [[ $1 = "gui" ]]; then
     MENU=$(
-        zenity --list \
+        yad --list \
         --title="Automatic Maintenance (Updates / Cleaning)" \
         --text="This program is a quick and easy way to automatically update your system." \
         --column="Option" --column="Description" \
@@ -47,7 +47,7 @@ ExecStart=/usr/bin/auto-maintenance
 [Install]
 WantedBy=multi-user.target' > /etc/systemd/system/auto-maintenance.service
 systemctl enable auto-maintenance
-echo Automatic Auto Maintenance will be enabled upon reboot.
+echo Automatic Maintenance will be enabled upon reboot.
 echo Use systemctl start auto-maintenance to start the service immediately.
 read -p "Press a key to continue"
 exit 0
@@ -57,7 +57,7 @@ if [[ $1 = "disable" ]]; then
 systemctl stop auto-maintenance
 systemctl disable auto-maintenance
 rm /etc/systemd/system/auto-maintenance.service
-echo Automatic Auto Maintenance is now disabled.
+echo Automatic Maintenance is now disabled.
 read -p "Press a key to continue"
 exit 0
 fi
