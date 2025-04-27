@@ -122,7 +122,7 @@ if [ -f ~/tcconfig ];then
 
     # RDP File support, this will break the server string for the other modes so we do it last
     if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
-        curl -fLs "$server" | enconv -L none -x UTF-8 > ~/destination.rdp
+        curl -m 5 -fLs "$server" | enconv -L none -x UTF-8 > ~/destination.tmp && [ -s ~/destination.tmp ] && mv ~/destination.tmp ~/destination.rdp
         rdp_destination="~/destination.rdp"
     else
         rdp_destination="/v:"$server
