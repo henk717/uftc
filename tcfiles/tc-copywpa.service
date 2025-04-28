@@ -9,6 +9,7 @@ RemainAfterExit=yes
 ExecStart=/bin/mv /boot/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 ExecStartPost=/bin/chmod 600 /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
 ExecStartPost=systemctl enable --now wpa_supplicant@wlan0
+ExecStartPost=/usr/sbin/iw wlan0 set power_save off
 
 [Install]
 WantedBy=multi-user.target
