@@ -2,7 +2,7 @@ FROM debian:bookworm
 
 COPY tcfiles/debian.sources /etc/apt/sources.list.d/debian.sources
 
-RUN apt update && apt install sudo curl freerdp2-x11 yad fvwm xterm xinit mingetty polkitd net-tools wpasupplicant systemd-resolved enca nano udiskie mc mtr firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 firmware-b43-installer open-vm-tools ffmpeg pipewire-audio pamixer -y
+RUN apt update && apt install sudo curl freerdp2-x11 yad fvwm xterm xinit mingetty polkitd net-tools wpasupplicant systemd-resolved enca nano udiskie mc mtr cups firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 firmware-b43-installer open-vm-tools ffmpeg pipewire-audio pamixer -y
 COPY tcfiles/thinclient /usr/bin/thinclient
 COPY tcfiles/set-hostname /usr/bin/set-hostname
 COPY tcfiles/firstboot /usr/bin/firstboot
