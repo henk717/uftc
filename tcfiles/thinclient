@@ -183,6 +183,8 @@ fi
 if [ ! -f ~/tcconfig ];then
 yad --info --ellipsize=middle --center --title="User Friendly Thin Client $VERSION by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the login password.\nYou can also use the login password terminal to access the terminal.\n\nNOTE: If you enter an admin password you will need to type this in front of the commands,\nthis version stores that password in plain text so do not submit your usual administrator passwords.\n\nCommands:\nconfig: Configuration screen\nterminal: Interactive Terminal\nping (Without password): My Traceroute\nip (Without password): Show IP information\nkill: Shut down this tool"
 password=config
+helpdesk="the helpdesk"
+volume="100"
 fi
 
 if [ "$password" = $adminpass"config" ];then
