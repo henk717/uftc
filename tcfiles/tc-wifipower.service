@@ -1,0 +1,12 @@
+[Unit]
+Description=Disable Wifi Powersave
+ConditionPathExists=/etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+After=dhcpcd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/iw wlan0 set power_save off
+
+[Install]
+WantedBy=multi-user.target
