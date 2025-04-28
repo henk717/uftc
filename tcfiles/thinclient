@@ -130,7 +130,7 @@ if [ -f ~/tcconfig ];then
 
     OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0  --title="Network Login | $VERSION" \
         --text="Enter your network credentials below" \
-        --separator="," \
+        --separator=$'\x1F' \
         --field="Username" \
         --field="Password":h)
     OUTPUT_RESULTS=$?
@@ -146,8 +146,8 @@ if [ -f ~/tcconfig ];then
         exit
     fi
     Blank=""
-    username=$(awk -F, '{print $1}' <<<$OUTPUT)
-    password=$(awk -F, '{print $2}' <<<$OUTPUT)
+    username=$(awk -F'\x1F' '{print $1}' <<<$OUTPUT)
+    password=$(awk -F'\x1F' '{print $2}' <<<$OUTPUT)
 fi
 
 if [ "$password" = $adminpass"kill" ];then
@@ -188,7 +188,7 @@ fi
 if [ "$password" = $adminpass"config" ];then
     OUTPUT=$(yad --form --center --window-icon=changes-allow --image=preferences-system --title="Configuration Utility | $VERSION" \
         --text="This will replace the configuration file with the provided settings" \
-        --separator="," \
+        --separator=$'\x1F' \
         --field="RDP Configuration":lbl --align=center "" \
         --field="Server" "$server" \
         --field="Domain" "$domain" \
@@ -200,13 +200,13 @@ if [ "$password" = $adminpass"config" ];then
         --field="Remote Config Location" "$config_url" )
     OUTPUT_RESULTS=$?
     if ((OUTPUT_RESULTS == 0)); then
-        echo server=\"$(awk -F, '{print $2}' <<<$OUTPUT)\" > ~/tcconfig
-        echo domain=\"$(awk -F, '{print $3}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo param=\"$(awk -F, '{print $4}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo volume=\"$(awk -F, '{print $5}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo adminpass=\"$(awk -F, '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo helpdesk=\"$(awk -F, '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo config_url=\"$(awk -F, '{print $9}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo server=\"$(awk -F'\x1F' '{print $2}' <<<$OUTPUT)\" > ~/tcconfig
+        echo domain=\"$(awk -F'\x1F' '{print $3}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo param=\"$(awk -F'\x1F' '{print $4}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo volume=\"$(awk -F'\x1F' '{print $5}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo adminpass=\"$(awk -F'\x1F' '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo helpdesk=\"$(awk -F'\x1F' '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo config_url=\"$(awk -F'\x1F' '{print $9}' <<<$OUTPUT)\" >> ~/tcconfig
     else
         yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
