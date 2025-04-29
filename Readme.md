@@ -81,9 +81,11 @@ The template for this file is as follows (pay attention to the line endings, the
 server=
 domain=
 param=
-volume=
 adminpass=
 helpdesk=
+volume=
+microphone=
+brightness=
 config_url=
 ```
 

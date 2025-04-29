@@ -92,6 +92,8 @@ if [ -f ~/tcconfig ];then
     fi
 
     pamixer -u --allow-boost --set-volume $volume
+    pamixer -u --default-source --allow-boost --set-volume $microphone
+    light -S $brightness
 
     if [ "$server" = "citrix" ];then
         yad --center --title=Loading --button="Please wait" --timeout=1
@@ -185,6 +187,8 @@ yad --info --ellipsize=middle --center --title="User Friendly Thin Client $VERSI
 password=config
 helpdesk="the helpdesk"
 volume="100"
+microphone="100"
+brightness="50"
 fi
 
 if [ "$password" = $adminpass"config" ];then
@@ -195,20 +199,25 @@ if [ "$password" = $adminpass"config" ];then
         --field="Server" "$server" \
         --field="Domain" "$domain" \
         --field="Parameters" "$param" \
-        --field="Speaker Volume" "$volume" \
         --field="Dialog Configuration":lbl --align=center "" \
         --field="Admin Password":h "$adminpass" \
         --field="Helpdesk Contact" "$helpdesk" \
+        --field="OS Configuration":lbl --align=center "" \
+        --field="Speaker Volume" "$volume" \
+        --field="Microphone Volume" "$microphone" \
+        --field="Screen Brightness" "$brightness" \
         --field="Remote Config Location" "$config_url" )
     OUTPUT_RESULTS=$?
     if ((OUTPUT_RESULTS == 0)); then
         echo server=\"$(awk -F'\x1F' '{print $2}' <<<$OUTPUT)\" > ~/tcconfig
         echo domain=\"$(awk -F'\x1F' '{print $3}' <<<$OUTPUT)\" >> ~/tcconfig
         echo param=\"$(awk -F'\x1F' '{print $4}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo volume=\"$(awk -F'\x1F' '{print $5}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo adminpass=\"$(awk -F'\x1F' '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo helpdesk=\"$(awk -F'\x1F' '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo config_url=\"$(awk -F'\x1F' '{print $9}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo adminpass=\"$(awk -F'\x1F' '{print $6}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo helpdesk=\"$(awk -F'\x1F' '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo volume=\"$(awk -F'\x1F' '{print $9}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo microphone=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo brightness=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo config_url=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
     else
         yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
