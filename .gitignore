@@ -2,3 +2,4 @@
 *.vhd
 *.deb
 *.Identifier
+tcconfig*
