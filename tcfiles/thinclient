@@ -115,6 +115,10 @@ if [ -f ~/tcconfig ];then
         exit_type="Shutdown"
     fi
 
+    if [[ -z "$login_timeout" ]]; then
+        login_timeout="600"
+    fi
+
     # Apply system configuration
     pamixer -u --allow-boost --set-volume $volume
     pamixer -u --default-source --allow-boost --set-volume $microphone
@@ -151,7 +155,7 @@ if [ -f ~/tcconfig ];then
     fi
 
     # Login Dialogue
-    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=$exit_type:1 --button=Connect:0 --timeout=600 --title="Network Login | $VERSION" \
+    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=$exit_type:1 --button=Connect:0 --timeout=$login_timeout --title="Network Login | $VERSION" \
         --text="Enter your network credentials below" \
         --separator=$'\x1F' \
         --field="Username" \
@@ -204,6 +208,7 @@ if [ ! -f ~/tcconfig ];then
     volume="100"
     microphone="100"
     brightness="50"
+    login_timeout="600"
     exit_type="Shutdown"
 fi
 
@@ -218,6 +223,7 @@ if [ "$password" = $adminpass"config" ];then
         --field="Dialog Configuration":lbl --align=center "" \
         --field="Admin Password":h "$adminpass" \
         --field="Helpdesk Contact" "$helpdesk" \
+        --field="Login Timeout in Seconds" "$login_timeout" \
         --field="OS Configuration":lbl --align=center "" \
         --field="Speaker Volume" "$volume" \
         --field="Microphone Volume" "$microphone" \
@@ -231,11 +237,12 @@ if [ "$password" = $adminpass"config" ];then
         echo param=\"$(awk -F'\x1F' '{print $4}' <<<$OUTPUT)\" >> ~/tcconfig
         echo adminpass=\"$(awk -F'\x1F' '{print $6}' <<<$OUTPUT)\" >> ~/tcconfig
         echo helpdesk=\"$(awk -F'\x1F' '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo volume=\"$(awk -F'\x1F' '{print $9}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo microphone=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo brightness=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo exit_type=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo config_url=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo login_timeout=\"$(awk -F'\x1F' '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo volume=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo microphone=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo brightness=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo exit_type=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo config_url=\"$(awk -F'\x1F' '{print $14}' <<<$OUTPUT)\" >> ~/tcconfig
     else
         yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
