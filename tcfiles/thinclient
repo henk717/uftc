@@ -125,6 +125,27 @@ if [ -f ~/tcconfig ];then
     light -S $brightness
     setxkbmap $keylayout
 
+
+    # Handle multiple servers
+    server_list=$server # We duplicate this so that a full list remains available, that way we don't break the existing code and configs
+    IFS='|' read -r -a servers <<< "$server_list"
+    if [ "${#servers[@]}" -ge 2 ]; then
+        yad_list=""
+        for s in "${servers[@]}"; do
+            yad_list+="$s\n"
+        done
+
+        yad_list=$(echo -e "$yad_list" | sed '/^$/d')
+        selected=$(echo -e "$yad_list" | yad --list --center --window-icon=changes-preven --button=$exit_type:1 --button=Select:0 --timeout=$login_timeout --title="Network Login | $VERSION" --column="Server Name" --width 300 --height 300)
+        OUTPUT_RESULTS=$?
+        if ((OUTPUT_RESULTS != 0)); then
+            shutdown_thinclient
+        fi
+        server=$(echo "$selected" | sed 's/[|[:space:]]*$//')
+    else
+        server="${servers[0]}"
+    fi
+
     # Citrix
     if [ "$server" = "citrix" ];then
         yad --center --title=Loading --button="Please wait" --timeout=1
@@ -214,6 +235,7 @@ if [ ! -f ~/tcconfig ];then
 fi
 
 if [ "$password" = $adminpass"config" ];then
+    server=$server_list
     OUTPUT=$(yad --form --center --window-icon=changes-allow --image=preferences-system --title="Configuration Utility | $VERSION" \
         --text="This will replace the configuration file with the provided settings" \
         --separator=$'\x1F' \
