@@ -1,6 +1,20 @@
 #!/bin/bash
 # Thin Client RDP GUI by Henk717
 
+shutdown_thinclient(){
+    echo "Shutdown requested.. Invoking $exit_type"
+    if [[ -f "desktop" || $exit_type == "Exit" || $exit_type == "exit" ]]; then
+        echo Desktop file exists or shutdown defined as exit only, not shutting the device down.
+        exit
+    elif [ $exit_type == "Sleep" ||  $exit_type == "sleep" ]; then
+        systemctl sleep
+    elif [ $exit_type == "Restart" || $exit_type == "restart" || $exit_type == "reboot" ]; then
+        systemctl reboot
+    else
+        systemctl poweroff
+    fi
+}
+
 PROTOCOL_DETECT="://"
 VERSION=`cat /tcversion`
 
@@ -93,6 +107,10 @@ if [ -f ~/tcconfig ];then
 
     load_config ~/tcconfig_override
 
+    if [[ -z "$exit_type" ]]; then
+        exit_type="Shutdown"
+    fi
+
     pamixer -u --allow-boost --set-volume $volume
     pamixer -u --default-source --allow-boost --set-volume $microphone
     light -S $brightness
@@ -113,13 +131,7 @@ if [ -f ~/tcconfig ];then
                 fi
                 /opt/Citrix/ICAClient/util/storebrowse -c SharedUserMode=True
                 /opt/Citrix/ICAClient/selfservice
-                echo "Shutdown requested.."
-                if [ -f "desktop" ]; then
-                    echo Desktop file exists, not shutting the whole PC down...
-                    exit
-                else
-                    systemctl poweroff
-                fi
+                shutdown_thinclient
             fi
         fi
     fi
@@ -132,22 +144,14 @@ if [ -f ~/tcconfig ];then
         rdp_destination="/v:"$server
     fi
 
-    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=Shutdown:1 --button=Connect:0 --timeout=600 --title="Network Login | $VERSION" \
+    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=$exit_type:1 --button=Connect:0 --timeout=600 --title="Network Login | $VERSION" \
         --text="Enter your network credentials below" \
         --separator=$'\x1F' \
         --field="Username" \
         --field="Password":h)
     OUTPUT_RESULTS=$?
     if ((OUTPUT_RESULTS != 0)); then
-        echo "Shutdown requested.."
-            if [ -f "desktop" ]; then
-            echo Desktop file exists, not shutting the whole PC down...
-            exit
-        else
-            systemctl poweroff
-        fi
-        $0 "$@" &
-        exit
+        shutdown_thinclient
     fi
     Blank=""
     username=$(awk -F'\x1F' '{print $1}' <<<$OUTPUT)
@@ -191,6 +195,7 @@ helpdesk="the helpdesk"
 volume="100"
 microphone="100"
 brightness="50"
+exit_type="Shutdown"
 fi
 
 if [ "$password" = $adminpass"config" ];then
@@ -208,6 +213,7 @@ if [ "$password" = $adminpass"config" ];then
         --field="Speaker Volume" "$volume" \
         --field="Microphone Volume" "$microphone" \
         --field="Screen Brightness" "$brightness" \
+        --field="Exit Type (Shutdown/Sleep/Restart)" "$exit_type" \
         --field="Remote Config Location" "$config_url" )
     OUTPUT_RESULTS=$?
     if ((OUTPUT_RESULTS == 0)); then
@@ -219,7 +225,8 @@ if [ "$password" = $adminpass"config" ];then
         echo volume=\"$(awk -F'\x1F' '{print $9}' <<<$OUTPUT)\" >> ~/tcconfig
         echo microphone=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
         echo brightness=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo config_url=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo exit_type=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo config_url=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
     else
         yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
