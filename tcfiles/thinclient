@@ -123,6 +123,7 @@ if [ -f ~/tcconfig ];then
     pamixer -u --allow-boost --set-volume $volume
     pamixer -u --default-source --allow-boost --set-volume $microphone
     light -S $brightness
+    setxkbmap $keylayout
 
     # Citrix
     if [ "$server" = "citrix" ];then
@@ -228,7 +229,9 @@ if [ "$password" = $adminpass"config" ];then
         --field="Speaker Volume" "$volume" \
         --field="Microphone Volume" "$microphone" \
         --field="Screen Brightness" "$brightness" \
+        --field="Keyboard Layout (RDP is separate)" "$keylayout" \
         --field="Exit Type (Shutdown/Sleep/Restart)" "$exit_type" \
+        --field="Remote Configuration":lbl --align=center "" \
         --field="Remote Config Location" "$config_url" )
     OUTPUT_RESULTS=$?
     if ((OUTPUT_RESULTS == 0)); then
@@ -241,8 +244,9 @@ if [ "$password" = $adminpass"config" ];then
         echo volume=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
         echo microphone=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/tcconfig
         echo brightness=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo exit_type=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo config_url=\"$(awk -F'\x1F' '{print $14}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo keylayout=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo exit_type=\"$(awk -F'\x1F' '{print $14}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo config_url=\"$(awk -F'\x1F' '{print $16}' <<<$OUTPUT)\" >> ~/tcconfig
     else
         yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
