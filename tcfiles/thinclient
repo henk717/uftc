@@ -6,9 +6,9 @@ shutdown_thinclient(){
     if [[ -f "desktop" || $exit_type == "Exit" || $exit_type == "exit" ]]; then
         echo Desktop file exists or shutdown defined as exit only, not shutting the device down.
         exit
-    elif [ $exit_type == "Sleep" ||  $exit_type == "sleep" ]; then
-        systemctl sleep
-    elif [ $exit_type == "Restart" || $exit_type == "restart" || $exit_type == "reboot" ]; then
+    elif [[ $exit_type == "Sleep" ||  $exit_type == "sleep" ]]; then
+        systemctl suspend
+    elif [[ $exit_type == "Restart" || $exit_type == "restart" || $exit_type == "reboot" ]]; then
         systemctl reboot
     else
         systemctl poweroff
