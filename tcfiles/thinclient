@@ -21,7 +21,7 @@ VERSION=`cat /tcversion`
 
 # Run second phase of the build if present
 if [[ -f /usr/bin/firstboot ]]; then
-    xterm -bg black -fg white -e sudo /usr/bin/firstboot
+    xterm -bg black -fg white -hold -e sudo /usr/bin/firstboot
 fi
 
 # Rename thinclient
