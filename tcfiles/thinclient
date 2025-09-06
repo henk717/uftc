@@ -124,6 +124,7 @@ if [ -f ~/tcconfig ];then
     pamixer -u --default-source --allow-boost --set-volume $microphone
     light -S $brightness
     setxkbmap $keylayout
+    xset dpms 0 $screen_timeout 0
 
 
     # Handle multiple servers
@@ -231,6 +232,7 @@ if [ ! -f ~/tcconfig ];then
     microphone="100"
     brightness="50"
     login_timeout="600"
+    screen_timeout="600"
     exit_type="Shutdown"
 fi
 
@@ -251,6 +253,7 @@ if [ "$password" = $adminpass"config" ];then
         --field="Speaker Volume" "$volume" \
         --field="Microphone Volume" "$microphone" \
         --field="Screen Brightness" "$brightness" \
+        --field="Screen Standby Timeout in Seconds" "$screen_timeout" \
         --field="Keyboard Layout (RDP is separate)" "$keylayout" \
         --field="Exit Type (Shutdown/Sleep/Restart)" "$exit_type" \
         --field="Remote Configuration":lbl --align=center "" \
@@ -266,9 +269,10 @@ if [ "$password" = $adminpass"config" ];then
         echo volume=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
         echo microphone=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/tcconfig
         echo brightness=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo keylayout=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo exit_type=\"$(awk -F'\x1F' '{print $14}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo config_url=\"$(awk -F'\x1F' '{print $16}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo screen_timeout=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo keylayout=\"$(awk -F'\x1F' '{print $14}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo exit_type=\"$(awk -F'\x1F' '{print $15}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo config_url=\"$(awk -F'\x1F' '{print $17}' <<<$OUTPUT)\" >> ~/tcconfig
     else
         yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
