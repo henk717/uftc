@@ -8,6 +8,8 @@ shutdown_thinclient(){
         exit
     elif [[ $exit_type == "Sleep" ||  $exit_type == "sleep" ]]; then
         systemctl suspend
+        $0 "$@" &
+        exit
     elif [[ $exit_type == "Restart" || $exit_type == "restart" || $exit_type == "reboot" ]]; then
         systemctl reboot
     else

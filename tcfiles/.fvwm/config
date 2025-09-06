@@ -96,7 +96,7 @@ AddToFunc StartFunction
 ######################## Menus ###################
 DestroyMenu MenuFvwmRoot
 AddToMenu MenuFvwmRoot  " User Friendly Thin Client by Henk.Tech    "             Title
-+                       "&1. Thinclient GUI"             Exec thinclient
++                       "&1. Thinclient GUI"             Exec killall thinclient;killall yad;thinclient
 +                       ""              Nop
 +                       "&R. Restart"          Exec systemctl reboot
 +                       "&Q. Shutdown"          Exec systemctl poweroff
