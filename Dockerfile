@@ -40,6 +40,7 @@ RUN useradd -ms /bin/bash thinclient -G video,audio,netdev,render,cdrom,plugdev
 
 COPY tcfiles/.fvwm /home/thinclient/.fvwm
 COPY tcfiles/bashrc /home/thinclient/.bashrc
+COPY tcfiles/xinitrc /home/thinclient/.xinitrc
 COPY Version /tcversion
 COPY tcconfig_override* /home/thinclient/
 
