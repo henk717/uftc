@@ -39,16 +39,55 @@ Important: The modern kernel could not be included in the build process, boot yo
 
 ## Usage
 
+### Installation from the ISO
+
+For easy installation an ISO based on clonezilla is available, this iso can be burned to a CD, flashed to USB with Rufus or be loaded from a Ventoy/Easy2boot USB stick.
+
+While a full copy of Clonezilla is bundled that allows you to capture your own images the recommended way of installing the official image is by using the first option in the boot menu. This will automatically use the recommended CloneZilla options.
+
+### Network deployment using Clonezilla on the ISO
+
+Because a full copy of Clonezilla is bundled on the disk you can use this to facilitate PXE deployments over the network using a tempoary private bittorrent server. A full copy of Clonezilla is normally not present on clonezilla made disks, because of this we will need to apply a small workaround to be able to use this option.
+
+##### Requirements:
+
+- The PXE server should be one of your target machines with the smallest amount of disk space and an identical type of drive.
+- This source machine should be correctly installed and configured as desired without disabling dynamic_hostname.
+- Every PXE booting machine will be wiped, ensure no machines that are not part of the deployment will PXE boot during this time.
+
+##### Instructions:
+
+0. Install and configure the source machine with UFTC.
+1. Load CloneZilla from the installation disk using the Start Clonezilla option.
+2. Enter Shell
+3. Type the following command : sudo rm /home/partimag && sudo mkdir /home/partimag && sudo mkdir /home/partimag/live
+4. Type exit to return back to the main screen and choose the Start_Clonezilla option.
+5. Choose Lite-Server and then choose Start
+6. Choose netboot or both
+7. Choose autodetect unless you know this to be incorrect for your network environment.
+8. Confirm the warning with Y
+9. Choose Beginner
+10. Choose massive-deployment
+11. Choose from-device
+12. Choose disk-2-mdisks
+13. Choose the correct source disk of your thinclient (This needs to be identical on the targets)
+14. Choose -fsck
+15. Choose -k0
+16. Choose -reboot (or -shutdown if you prefer, but rebooting is recommended as it is easier to see if the install was succesfull and in their default configuration the thinclients will automatically turn off)
+17. Choose bittorrent (This is the fastest and most reliable option, it will help all your thinclients seed to other thin clients during the setup speeding up the process and allowing proper error checking)
+
+After these steps your source thinclient is now a deployment server for the other machines in your network. Ensure that the target thinclients boot from the network. After you are done you can finish yes to the question if all jobs finished to shut down the PXE server.
+
 ### Flashing to target media
 
 This image is a direct drive image without an installer, you can directly flash it to the target media.
 For flashing on Windows Rufus is compatible and directly compatible with the .vhd format.
 On Linux you can use ``qemu-img convert /location/of.vhd /dev/targetdevice``
 
-### Installing on the target device
+### Installing the VHD on the target device
 
 Because we don't have a mandatory installer you have every possibility available for deployment that you'd like.
-The recommended method is using RescueZilla on a Ventoy USB stick, this will allow you to deploy the provided VHD image as well as capture your own. If you prefer a more traditional install an ISO is available.
+The recommended method of flashing VHD's directly is using RescueZilla on a Ventoy USB stick, this will allow you to deploy the provided VHD image as well as capture your own.
 
 ### WiFi
 
@@ -65,31 +104,35 @@ network={
 }
 ```
 
-### Manual setup
+### Manual configuration
 
 If the thinclient is not preconfigured on the boot partition it will automatically boot its configuration screen.
 Fill in the fields you require for your deployment, if your server is not connected to a domain leave this blank.
 The parameters field are for additional xfreerdp parameters.
 The helpdesk field will be used in the middle of error message sentences, for example "Please contact HELPDESK if this is not resolved after 5 minutes."
 
-### Automatic setup
+### Automatic configuration
 
 Just like the WiFi the settings for the thinclient software can also be preconfigured by placing a tcconfig file in the boot partition.
 The template for this file is as follows (pay attention to the line endings, they need to be linux compatible):
 
 ```
-server=
-domain=
-param=
-adminpass=
-helpdesk=
-volume=
-microphone=
-brightness=
-config_url=
+server="server1|server2|server3"
+domain=""
+param=""
+adminpass=""
+helpdesk="the helpdesk"
+login_timeout="600"
+volume="100"
+microphone="100"
+brightness="50"
+screen_timeout="600"
+keylayout=""
+exit_type="Shutdown"
+config_url=""
 ```
 
-### Remote Setup (Own risk)
+### Remote configuration (Own risk)
 
 If a config_url is defined the thinclient will automatically download its config file every time the login screen is shown.
 As a safety measure the config is only written on a succesful download and the previous working URL is backed up to a seperate file (If your new location is succesful the old URL is overwritten).
@@ -104,12 +147,16 @@ You implement this functionality strictly on your own risk. If left blank this f
 
 ### RDP Files
 
-Some functionality such as connecting to a connection broker collection can only be achieved trough .rdp files just like mstsc on Windows.
-To make this possible you can choose to use a download link for the RDP file as the server name.
+UFTC supports existing RDP files if downloaded from a central location, to do this simply put the RDP URL as the server name.
 
 ### Citrix Mode
 
 There is a basic Citrix mode on board that can be activated by putting citrix as the server name. The URL of the Citrix Storefront can be preconfigured by putting it in the parameters, each time this setting changes to a new URL the Citrix profile is wiped.
+
+### Multiple Servers
+
+Starting at version 1.10 UFTC supports specifying multiple RDP servers (and optionally also citrix if neither uses additional parameters).
+To set this up use the regular server field and seperate the servers with |
 
 ### Root Account
 
