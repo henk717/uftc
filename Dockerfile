@@ -12,6 +12,7 @@ COPY tcfiles/set-hostname /usr/bin/set-hostname
 COPY tcfiles/firstboot /usr/bin/firstboot
 COPY tcfiles/auto-maintenance.debian /usr/bin/auto-maintenance
 COPY tcfiles/099_tc /etc/sudoers.d/099_tc
+COPY tcfiles/usb-access.rules /etc/udev/rules.d/usb-access.rules
 RUN chmod +x /usr/bin/*
 
 RUN mkdir -p /etc/systemd/system/getty@tty1.service.d
