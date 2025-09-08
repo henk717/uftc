@@ -285,7 +285,7 @@ fi
 # We passed all the UI's and now try to launch RDP
 echo "Start of session" > session.log
 if [ "$server" != "citrix" ];then
-    bash -c "WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp $rdp_destination /d:$domain /u:$username /p:$password /multimon +multitouch /cert-ignore /f /network:auto /sound:rate:44100,channel:2 /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport /client-hostname:$hostname $param" # Somehow this only works when wrapped in bash otherwise it cant understand the positional argument
+    bash -c "WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp3 $rdp_destination /d:$domain /u:$username /p:$password /multimon +multitouch /cert:ignore /f /network:auto /sound:rate:44100,channel:2 /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport /client-hostname:$hostname $param" # Somehow this only works when wrapped in bash otherwise it cant understand the positional argument
 fi
 
 # RDP is no longer running, we diagnose why

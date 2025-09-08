@@ -1,8 +1,8 @@
-FROM debian:bookworm
+FROM debian:trixie
 
 COPY tcfiles/debian.sources /etc/apt/sources.list.d/debian.sources
 
-RUN apt update && apt install sudo curl wget freerdp2-x11 yad fvwm xterm xinit light mingetty polkitd net-tools iw wpasupplicant systemd-resolved ifupdown ethtool enca nano udiskie mc mtr cups firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 open-vm-tools ffmpeg pulseaudio pamixer x11-xserver-utils -y
+RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit light mingetty polkitd net-tools iw wpasupplicant systemd-resolved ifupdown ethtool enca nano udiskie mc mtr cups firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 open-vm-tools ffmpeg pulseaudio pamixer x11-xserver-utils adwaita-icon-theme-legacy -y
 
 COPY icaclient.deb* /tmp/
 RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
