@@ -190,8 +190,9 @@ if [ -f ~/tcconfig ];then
         shutdown_thinclient
     fi
     Blank=""
-    username=$(awk -F'\x1F' '{print $1}' <<<$OUTPUT)
-    password=$(awk -F'\x1F' '{print $2}' <<<$OUTPUT)
+    username=$(printf '%q' "$(awk -F'\x1F' '{print $1}' <<<"$OUTPUT")")
+    password=$(printf '%q' "$(awk -F'\x1F' '{print $2}' <<<"$OUTPUT")")
+
 fi
 
 # Password commands
