@@ -286,6 +286,12 @@ fi
 # We passed all the UI's and now try to launch RDP
 echo "Start of session" > session.log
 if [ "$server" != "citrix" ];then
+    # Because we are about to bash -c we sanetize the inputs which bash -c will convert back properly
+    rdp_destination=$(printf '%q' "$rdp_destination")
+    domain=$(printf '%q' "$domain")
+    param=$(printf '%q' "$param")
+    hostname=$(printf '%q' "$hostname")
+    # Username and Password are already sanetized during input, we don't do it twice.
     bash -c "WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp3 $rdp_destination /d:$domain /u:$username /p:$password /multimon +multitouch /cert:ignore /f /network:auto /sound:rate:44100,channel:2 /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport /client-hostname:$hostname $param" # Somehow this only works when wrapped in bash otherwise it cant understand the positional argument
 fi
 
