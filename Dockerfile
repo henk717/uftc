@@ -5,7 +5,7 @@ COPY tcfiles/debian.sources /etc/apt/sources.list.d/debian.sources
 RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit light mingetty polkitd net-tools iw wpasupplicant systemd-resolved ifupdown ethtool enca nano udiskie mc mtr cups firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 open-vm-tools ffmpeg pulseaudio pamixer x11-xserver-utils adwaita-icon-theme-legacy -y
 
 COPY icaclient.deb* /tmp/
-RUN apt install /tmp/icaclient.deb libsoup-2.4-1 -y && rm /tmp/icaclient.deb || true
+RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
 
 COPY tcfiles/thinclient /usr/bin/thinclient
 COPY tcfiles/set-hostname /usr/bin/set-hostname
@@ -52,3 +52,4 @@ USER thinclient
 WORKDIR /home/thinclient
 
 RUN touch dynamic_hostname
+
