@@ -26,6 +26,8 @@ Super simple to setup, and easy for the end user.
 
 ## Build your own image
 
+To succesfully build the image this project must be git cloned with a Linux system, if not the line endings and file permissions may not be correct.
+
 Image building requires docker and can be done inside of WSL2 if desired.
 
 ```
