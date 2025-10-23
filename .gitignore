@@ -3,3 +3,4 @@
 *.deb
 *.Identifier
 tcconfig*
+*.AppImage

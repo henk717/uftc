@@ -171,6 +171,17 @@ if [ -f ~/tcconfig ];then
         fi
     fi
 
+    # Moonlight
+    if [ "$server" = "moonlight" ];then
+        yad --center --title=Loading --button="Please wait" --timeout=1
+        if [ "$?" == "70" ];then
+            if [ -f /usr/bin/moonlight ];then
+                /usr/bin/moonlight $param
+                shutdown_thinclient
+            fi
+        fi
+    fi
+
     # RDP File support, this will break the server string for the other modes so we do it last
     if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
         curl -m 5 -fLs "$server" | enconv -L none -x UTF-8 > ~/destination.tmp && [ -s ~/destination.tmp ] && mv ~/destination.tmp ~/destination.rdp
@@ -285,7 +296,7 @@ fi
 
 # We passed all the UI's and now try to launch RDP
 echo "Start of session" > session.log
-if [ "$server" != "citrix" ];then
+if [ "$server" != "citrix" && "$server" != "moonlight" ];then
     # Because we are about to bash -c we sanetize the inputs which bash -c will convert back properly
     # Conditional because xfreerdp breaks if we do this with an empty variable
     if [[ -n "$rdp_destination" ]]; then
@@ -311,18 +322,18 @@ fi
 if ! grep -F "BY_USER" session.log;then
     grep -F "ERRCONNECT_LOGON_FAILURE" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The Login attempt has failed.\nPlease try again or contact $helpdesk if the issue persists."
     grep -F "ERRCONNECT_WRONG_PASSWORD" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="You have entered incorrect login information.\nPlease try again."
-    grep -F "ERRCONNECT_CONNECT_FAILED" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="We could not establish a connection with the server $server, restart this device and contact $helpdesk if the issue persists after 5 minutes."
-    grep -F "ERRCONNECT_DNS_NAME_NOT_FOUND" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="We could not find a server called $server, restart this device and contact $helpdesk if the issue persists after 5 minutes."
+    grep -F "ERRCONNECT_CONNECT_FAILED" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="We could not establish a connection with the server $server, restart your device and contact $helpdesk if the issue persists after 5 minutes."
+    grep -F "ERRCONNECT_DNS_NAME_NOT_FOUND" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="We could not find a server called $server, restart your device and contact $helpdesk if the issue persists after 5 minutes."
     grep -F "ERRCONNECT_AUTHENTICATION_FAILED" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The server was unable to verify your credentials.\nIf you still experience this error after 10 minutes please contact $helpdesk."
-    grep -F "ERRCONNECT_CONNECT_TRANSPORT_FAILED" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="We have encountered a server issue.\nThis can have the following causes.\n\nThe server is unable to take your connection at this time.\nYour account does not have permissions to access the server but was not locked out.\nThe server $server is not the correct server.\nThere was another issue on this machine or network that prevented the connection from succeeding.\n\nPlease reboot the machine, if you are still unable to login after this contact $helpdesk"
+    grep -F "ERRCONNECT_CONNECT_TRANSPORT_FAILED" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="We have encountered a server issue.\nThis can have the following causes.\n\nThe server is unable to take your connection at this time.\nYour account does not have permissions to access the server but was not locked out.\nThe server $server is not the correct server.\nThere was another issue on this machine or network that prevented the connection from succeeding.\n\nPlease reboot your device, if you are still unable to login after this contact $helpdesk"
     grep -F "ERRCONNECT_PASSWORD_MUST_CHANGE" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="Your password has expired and needs to be changed, please contact $helpdesk for assistance."
     grep -F "ERRCONNECT_ACCOUNT_DISABLED" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="You can not login with this account.\nContact $helpdesk for more information."
     grep -F "ERRCONNECT_ACCOUNT_LOCKED_OUT" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="Your account has been locked out because of to many failed attempts, please contact $helpdesk and ask for an account unlock (Accounts may unlock automatically after enough time has passed)."
     grep -F "ERRCONNECT_ACCOUNT_RESTRICTION" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="You are unable to login because of an account restriction.\nFor example you may not be allowed to login at this hour or day.\nPlease contact $helpdesk for more information."
-    grep -F "ERRINFO_SERVER" session.log && yad --error --title="Error" --timeout=900 --center --ellipsize=middle --text="Server connection failed.\nPlease try again, restart the device and otherwise contact $helpdesk for assistance."
+    grep -F "ERRINFO_SERVER" session.log && yad --error --title="Error" --timeout=900 --center --ellipsize=middle --text="Server connection failed.\nPlease try again, restart your device and otherwise contact $helpdesk for assistance."
     grep -F "ERRINFO_LICENSE" session.log && yad --error --title="Error" --timeout=900 --center --ellipsize=middle --text="To many accounts are currently logged in.\n Please inform $helpdesk ."
     grep -F "ERRINFO_OUT_OF_MEMORY" session.log && yad --error --title="Error" --timeout=900 --center --ellipsize=middle --text="The server $server ran out of memory.\n Please inform $helpdesk ."
-    grep -F "ERRINFO_CB_DESTINATION_NOT_FOUND" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The server $server could not be reached, restart this device and contact $helpdesk if the issue persists."
+    grep -F "ERRINFO_CB_DESTINATION_NOT_FOUND" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The server $server could not be reached, restart your device and contact $helpdesk if the issue persists."
     grep -F "ERRINFO_CB_DESTINATION_POOL_NOT_FREE" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The server $server did not have a session available for you.\nTry again in 10 minutes and contact $helpdesk if the issue persists."
     grep -F "ERRINFO_CB_CONNECTION_ERROR_INVALID_SETTINGS" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="Invalid settings.\n Please contact $helpdesk and inform them the settings used are \n$server\n$param."
 fi
