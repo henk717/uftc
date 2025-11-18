@@ -103,6 +103,7 @@ country=CN
 network={
 	ssid="SSID GOES HERE"
 	psk="Password goes here"
+	bgscan="simple:30:-65:15"
 }
 ```
 
