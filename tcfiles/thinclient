@@ -296,7 +296,7 @@ fi
 
 # We passed all the UI's and now try to launch RDP
 echo "Start of session" > session.log
-if [ "$server" != "citrix" && "$server" != "moonlight" ];then
+if [[ "$server" != "citrix" && "$server" != "moonlight" ]]; then
     # Because we are about to bash -c we sanetize the inputs which bash -c will convert back properly
     # Conditional because xfreerdp breaks if we do this with an empty variable
     if [[ -n "$rdp_destination" ]]; then
