@@ -121,5 +121,6 @@ if [[ ! ${DISPLAY} && ${TERM} == 'linux' && ${TTY} == 'tty1' ]]; then
   unset TTY
   udiskie &
   exec startx
+  logout
 fi
 unset TTY
