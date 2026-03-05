@@ -111,7 +111,7 @@ if [ -f ~/tcconfig ];then
     fi
 
     load_config ~/tcconfig_override
-
+    original_param=$param
     # Some values used to be hardcoded but are important, we define the old hardcoded variables here in case they are missing from production configs
     if [[ -z "$exit_type" ]]; then
         exit_type="Shutdown"
@@ -119,6 +119,15 @@ if [ -f ~/tcconfig ];then
 
     if [[ -z "$login_timeout" ]]; then
         login_timeout="600"
+    fi
+
+    # Convert optional parameter to variable
+    if [[ "$param" == *"/autologon"* ]]; then
+        param=$(echo "$param" | sed 's/ *\/autologon//')
+        yad --center --title=Loading --button="Please wait" --timeout=1
+        if [ "$?" == "70" ];then
+            autologon="true"
+        fi
     fi
 
     # Apply system configuration
@@ -190,20 +199,23 @@ if [ -f ~/tcconfig ];then
         rdp_destination="/v:"$server
     fi
 
-    # Login Dialogue
-    OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=$exit_type:1 --button=Login:0 --timeout=$login_timeout --title="Network Login | $VERSION" \
-        --text="Enter your network credentials below" \
-        --separator=$'\x1F' \
-        --field="Username" \
-        --field="Password":h)
-    OUTPUT_RESULTS=$?
-    if ((OUTPUT_RESULTS != 0)); then
-        shutdown_thinclient
+    if [[ "$autologon" == "true" ]]; then
+        echo "Autologon is enabled, skipping login form"
+    else
+        # Login Dialogue
+        OUTPUT=$(yad --form --center --window-icon=changes-prevent --image=dialog-password --button=$exit_type:1 --button=Login:0 --timeout=$login_timeout --title="Network Login | $VERSION" \
+            --text="Enter your network credentials below" \
+            --separator=$'\x1F' \
+            --field="Username" \
+            --field="Password":h)
+        OUTPUT_RESULTS=$?
+        if ((OUTPUT_RESULTS != 0)); then
+            shutdown_thinclient
+        fi
+        Blank=""
+        username=$(printf '%q' "$(awk -F'\x1F' '{print $1}' <<<"$OUTPUT")")
+        password=$(printf '%q' "$(awk -F'\x1F' '{print $2}' <<<"$OUTPUT")")
     fi
-    Blank=""
-    username=$(printf '%q' "$(awk -F'\x1F' '{print $1}' <<<"$OUTPUT")")
-    password=$(printf '%q' "$(awk -F'\x1F' '{print $2}' <<<"$OUTPUT")")
-
 fi
 
 # Password commands
@@ -258,7 +270,7 @@ if [ "$password" = $adminpass"config" ];then
         --field="RDP Configuration":lbl --align=center "" \
         --field="Server" "$server" \
         --field="Domain" "$domain" \
-        --field="Parameters" "$param" \
+        --field="Parameters" "$original_param" \
         --field="Dialog Configuration":lbl --align=center "" \
         --field="Admin Password":h "$adminpass" \
         --field="Helpdesk Contact" "$helpdesk" \
@@ -319,7 +331,7 @@ if [[ "$server" != "citrix" && "$server" != "moonlight" ]]; then
 fi
 
 # RDP is no longer running, we diagnose why
-if ! grep -F "BY_USER" session.log;then
+if ! grep -F "BY_USER" session.log; then
     grep -F "ERRCONNECT_LOGON_FAILURE" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The Login attempt has failed.\nPlease try again or contact $helpdesk if the issue persists."
     grep -F "ERRCONNECT_WRONG_PASSWORD" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="You have entered incorrect login information.\nPlease try again."
     grep -F "ERRCONNECT_CONNECT_FAILED" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="We could not establish a connection with the server $server, restart your device and contact $helpdesk if the issue persists after 5 minutes."
@@ -336,6 +348,13 @@ if ! grep -F "BY_USER" session.log;then
     grep -F "ERRINFO_CB_DESTINATION_NOT_FOUND" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The server $server could not be reached, restart your device and contact $helpdesk if the issue persists."
     grep -F "ERRINFO_CB_DESTINATION_POOL_NOT_FREE" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="The server $server did not have a session available for you.\nTry again in 10 minutes and contact $helpdesk if the issue persists."
     grep -F "ERRINFO_CB_CONNECTION_ERROR_INVALID_SETTINGS" session.log && yad --error --timeout=900 --title="Error" --center --ellipsize=middle --text="Invalid settings.\n Please contact $helpdesk and inform them the settings used are \n$server\n$param."
+else
+    echo "User logged out"
+    user_signout="true"
+fi
+
+if [[ "$autologon" == "true" && "$user_signout" == "true" ]]; then
+    shutdown_thinclient
 fi
 
 # Restart the application, this will fetch updated configs and return us to the login screen
