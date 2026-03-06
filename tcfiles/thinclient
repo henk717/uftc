@@ -121,12 +121,14 @@ if [ -f ~/tcconfig ];then
         login_timeout="600"
     fi
 
-    # Convert optional parameter to variable
-    if [[ "$param" == *"/autologon"* ]]; then
-        param=$(echo "$param" | sed 's/ *\/autologon//')
+    # Give the fake please wait option to allow manual logon
+    if [[ "$autologon" == "true" ]]; then
         yad --center --title=Loading --button="Please wait" --timeout=1
-        if [ "$?" == "70" ];then
-            autologon="true"
+        if [ "$?" == "0" ];then
+            autologon="false"
+        else # We can't trust these inputs just like with the login form, so we wrap them (I do it here because for the login form I want it to be very early in the chain directly after the form, and we cant do it twice)
+            username=$(printf '%q' "$username")
+            password=$(printf '%q' "$password")
         fi
     fi
 
@@ -326,8 +328,17 @@ if [[ "$server" != "citrix" && "$server" != "moonlight" ]]; then
     if [[ -n "$hostname" ]]; then
         hostname=$(printf '%q' "$hostname")
     fi
-    # Username and Password are already sanetized during input, we don't do it twice.
-    bash -c "WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp3 $rdp_destination /d:$domain /u:$username /p:$password /multimon +multitouch /cert:ignore /f /network:auto /sound:rate:44100,channel:2 /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport /client-hostname:$hostname $param" # Somehow this only works when wrapped in bash otherwise it cant understand the positional argument
+    # Username and Password are already sanetized during input, we don't do it twice but we do need to append the correct prefix
+    if [[ -n "$username" ]]; then
+        username="/u:$username"
+    fi
+    if [[ -n "$password" ]]; then
+        password="/p:$password"
+    fi
+    if [[ -n "$domain" ]]; then
+        domain="/d:$domain"
+    fi
+    bash -c "WLOG_APPENDER=file WLOG_FILEAPPENDER_OUTPUT_FILE_NAME=session.log WLOG_FILEAPPENDER_OUTPUT_FILE_PATH=. xfreerdp3 $rdp_destination $domain $username $password /multimon +multitouch /cert:ignore /f /network:auto /sound:rate:44100,channel:2 /dynamic-resolution /usb:auto +drives +auto-reconnect +multitransport /client-hostname:$hostname $param" # Somehow this only works when wrapped in bash otherwise it cant understand the positional argument
 fi
 
 # RDP is no longer running, we diagnose why
