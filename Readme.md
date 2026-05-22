@@ -153,10 +153,11 @@ You implement this functionality strictly on your own risk. If left blank this f
 UFTC supports existing RDP files if downloaded from a central location, to do this simply put the RDP URL as the server name.
 
 ### Moonlight Mode
+
 Moonlight is included as a self contained 50mb binary and can be activated by using moonlight as the server address.
 Moonlight focuses on remotely connecting to a pre-configured single session PC and provides low latency multimedia as well as game controller support.
 If you are looking to use this thin client for a living room PC or media heavy display moonlight may provide a suitable option.
-For use with the Sunlight or Apollo server. 
+For use with the Sunlight or Apollo server.
 
 ### Multiple Servers
 
@@ -177,6 +178,8 @@ When self building you can pass a -p parameter to enable the root password.
 config : Re-open the config dialogue
 
 terminal: Open the terminal
+
+network: GUI based network configuration
 
 ping (without your admin password in front): Ping the RDP server with a full traceroute, users can change this to any required destination if needed.
 
