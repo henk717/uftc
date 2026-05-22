@@ -1,0 +1,15 @@
+[Unit]
+Description=Configure NetworkManager from Boot
+ConditionPathExists=/boot/system-connections
+Before=dhcpcd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/rm -rf /etc/NetworkManager/system-connections/*
+ExecStartPost=/bin/sh -c 'shopt -s nullglob; mv /boot/system-connections/* /etc/NetworkManager/system-connections/'
+ExecStartPost=/bin/sh -c 'shopt -s nullglob; chmod 600 /etc/NetworkManager/system-connections/*'
+ExecStartPost=/bin/rm -rf /boot/system-connections
+
+[Install]
+WantedBy=multi-user.target

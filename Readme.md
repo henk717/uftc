@@ -91,20 +91,35 @@ On Linux you can use ``qemu-img convert /location/of.vhd /dev/targetdevice``
 Because we don't have a mandatory installer you have every possibility available for deployment that you'd like.
 The recommended method of flashing VHD's directly is using RescueZilla on a Ventoy USB stick, this will allow you to deploy the provided VHD image as well as capture your own.
 
-### WiFi
+### Network Configuration
 
-WiFi can be enabled by placing a suitable wpa_supplicant.conf on the boot partition.
-Here is a template (Don't forget to change the country, I put china as the example due to the broadest range):
-
+As of UFTC 2.4 we use Network Manager for the configuration, the old wpa_supplicant.conf file is no longer compatible.
+The easiest way to set up networking is by using [admin]network as the login password for a GUI based configuration.
+If you prefer placing config files similar to tcconfig you can create a system-connections folder on the boot partition.
+This folder you can fill with the .nmconnection files from /etc/NetworkManager/system-connections .
+Here is an example of wifi.nmconnection to get you started:
 ```
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-country=CN
-network={
-	ssid="SSID GOES HERE"
-	psk="Password goes here"
-	bgscan="simple:30:-65:15"
-}
+[connection]
+id=Wi-Fi connection 1
+uuid=0965acf1-b568-4c19-9a72-9c59bcc1d229
+type=wifi
+
+[wifi]
+mode=infrastructure
+ssid=SSID_GOES_HERE
+
+[wifi-security]
+key-mgmt=wpa-psk
+psk=PASSWORD_GOES_HERE
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=stable-privacy
+method=auto
+
+[proxy]
 ```
 
 ### Manual configuration
