@@ -231,6 +231,12 @@ if [ "$password" = $adminpass"terminal" ];then
     exit 0
 fi
 
+if [ "$password" = $adminpass"network" ];then
+    nm-connection-editor
+    $0
+    exit 0
+fi
+
 if [ "$password" = "ping" ];then
     if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
         mtr $(cat ~/destination.rdp | grep "full address:s:" | sed 's/full address:s://g' | sed 's/:.*//g' | tr -d '\r' | tr -d '\n')
