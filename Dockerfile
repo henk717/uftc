@@ -2,7 +2,7 @@ FROM debian:trixie
 
 COPY tcfiles/debian.sources /etc/apt/sources.list.d/debian.sources
 
-RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit light mingetty polkitd net-tools iw wpasupplicant systemd-resolved nm-connection-editor ethtool enca nano udiskie mc mtr cups mesa-utils firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 open-vm-tools ffmpeg pulseaudio pamixer x11-xserver-utils adwaita-icon-theme-legacy libfuse2 -y
+RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit light mingetty polkitd net-tools iw wpasupplicant systemd-resolved nm-connection-editor ethtool network-manager-pptp-gnome network-manager-l2tp-gnome network-manager-openvpn-gnome network-manager-sstp-gnome wireguard enca nano udiskie mc mtr cups mesa-utils firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 open-vm-tools ffmpeg pulseaudio pamixer x11-xserver-utils adwaita-icon-theme-legacy libfuse2 -y
 
 COPY icaclient.deb* /tmp/
 RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
