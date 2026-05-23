@@ -1,0 +1,11 @@
+[Unit]
+Description=Enable Wake-on-LAN on all Ethernet interfaces
+After=NetworkManager-wait-online.service
+Wants=NetworkManager-wait-online.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'for IFACE in /sys/class/net/eth*; do IFACE_NAME=$(basename "$IFACE"); ethtool -s "$IFACE_NAME" wol g || true; done'
+
+[Install]
+WantedBy=multi-user.target

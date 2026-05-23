@@ -33,8 +33,10 @@ RUN systemctl enable tc-copynm.service
 COPY tcfiles/tc-wifipower.service /etc/systemd/system/tc-wifipower.service
 RUN systemctl enable tc-wifipower.service
 
+COPY tcfiles/tc-wakeonlan.service /etc/systemd/system/tc-wakeonlan.service
+RUN systemctl enable tc-wakeonlan.service
 
-COPY tcfiles/dhcp.network /etc/systemd/network/dhcp.network
+#COPY tcfiles/dhcp.network /etc/systemd/network/dhcp.network
 #COPY tcfiles/interfaces /etc/network/interfaces
 COPY tcfiles/NetworkManager.conf /etc/NetworkManager/NetworkManager.conf
 
