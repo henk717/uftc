@@ -25,7 +25,7 @@ is_sha256() {
 
 # This allows secure password storage, you can replace the $1 in the echo if you wish to do it manually for your config making
 hash_password() {
-    if is_sha256 "$1"; then
+    if is_sha256 "$1" || [[ -z "$1" ]]; then
         echo "$1"
     else
         echo -n "$1" | sha256sum | awk '{print $1}'
@@ -41,8 +41,8 @@ correct_adminpass() {
     
     # Reject if input is a SHA256 hash (prevent hash injection)
     if is_sha256 "$password"; then
-        yad --error --title="Nice try!" --text="Incorrect password!" --center --width=300 --button="OK:0"
-        return 1
+        yad --error --title="Nice try!" --text="Incorrect password!" --center --width=300 --button="OK:0" --timeout=5
+        shutdown_thinclient
     fi
     
     # If stored adminpass is not SHA256 (legacy raw password), compare as-is
@@ -51,7 +51,8 @@ correct_adminpass() {
             return 0
         else
             yad --error --title="Access Denied" --text="Incorrect password!" --center --width=300 --button="OK:0"
-            return 1
+            $0
+            exit 0
         fi
     fi
     
@@ -62,7 +63,8 @@ correct_adminpass() {
         return 0
     else
         yad --error --title="Access Denied" --text="Incorrect password!" --center --width=300 --button="OK:0"
-        return 1
+        $0
+        exit 0
     fi
 }
 
