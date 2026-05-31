@@ -167,6 +167,10 @@ You implement this functionality strictly on your own risk. If left blank this f
 
 UFTC supports existing RDP files if downloaded from a central location, to do this simply put the RDP URL as the server name.
 
+### Citrix Mode
+
+There is a basic Citrix mode on board that can be activated by putting citrix as the server name. The URL of the Citrix Storefront can be preconfigured by putting it in the parameters, each time this setting changes to a new URL the Citrix profile is wiped.
+
 ### Moonlight Mode
 
 Moonlight is included as a self contained 50mb binary and can be activated by using moonlight as the server address.
