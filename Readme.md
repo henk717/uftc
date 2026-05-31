@@ -188,7 +188,7 @@ set-hostname , this tool changes the hostname of the thinclient. If the dynamic_
 
 When self building you can pass a -p parameter to enable the root password.
 
-### Password commands
+### Special usernames
 
 config : Re-open the config dialogue
 
@@ -196,9 +196,9 @@ terminal: Open the terminal
 
 network: GUI based network configuration
 
-ping (without your admin password in front): Ping the RDP server with a full traceroute, users can change this to any required destination if needed.
+ping (No password needed): Ping the RDP server with a full traceroute, users can change this to any required destination if needed.
 
-ip (without your admin password in front): Shows the devices network information
+ip (No password needed): Shows the devices network information
 
 ## Terms of Use
 
