@@ -1,5 +1,6 @@
 #!/bin/bash
 # Thin Client RDP GUI by Henk717
+password=""
 
 shutdown_thinclient(){
     echo "Shutdown requested.. Invoking $exit_type"
@@ -14,6 +15,54 @@ shutdown_thinclient(){
         systemctl reboot
     else
         systemctl poweroff
+    fi
+}
+
+# To keep compatibility with legacy passwords and allow config changes without needing to re-enter the password we need to know if its sha256
+is_sha256() {
+    [[ "$1" =~ ^[a-f0-9]{64}$ ]]
+}
+
+# This allows secure password storage, you can replace the $1 in the echo if you wish to do it manually for your config making
+hash_password() {
+    if is_sha256 "$1"; then
+        echo "$1"
+    else
+        echo -n "$1" | sha256sum | awk '{print $1}'
+    fi
+}
+
+# Function to verify admin password, it accepts passwords that aren't SHA256 as well as hashed passwords, but not verbatim SHA256 strings to prevent a bypass
+correct_adminpass() {
+    # Pass if adminpass is unset or empty
+    if [[ -z "$adminpass" ]]; then
+        return 0
+    fi
+    
+    # Reject if input is a SHA256 hash (prevent hash injection)
+    if is_sha256 "$password"; then
+        yad --error --title="Nice try!" --text="Incorrect password!" --center --width=300 --button="OK:0"
+        return 1
+    fi
+    
+    # If stored adminpass is not SHA256 (legacy raw password), compare as-is
+    if ! is_sha256 "$adminpass"; then
+        if [[ "$password" == "$adminpass" ]]; then
+            return 0
+        else
+            yad --error --title="Access Denied" --text="Incorrect password!" --center --width=300 --button="OK:0"
+            return 1
+        fi
+    fi
+    
+    # Otherwise compare hashes
+    local input_hash=$(hash_password "$password")
+    
+    if [[ "$input_hash" == "$adminpass" ]]; then
+        return 0
+    else
+        yad --error --title="Access Denied" --text="Incorrect password!" --center --width=300 --button="OK:0"
+        return 1
     fi
 }
 
@@ -221,23 +270,23 @@ if [ -f ~/tcconfig ];then
 fi
 
 # Password commands
-if [ "$password" = $adminpass"kill" ];then
+if [ "$username" = "kill" ] && correct_adminpass; then
     exit 0
 fi
 
-if [ "$password" = $adminpass"terminal" ];then
+if [ "$username" = "terminal" ] && correct_adminpass; then
     xterm -bg black -fg white
     $0
     exit 0
 fi
 
-if [ "$password" = $adminpass"network" ];then
+if [ "$username" = "network" ] && correct_adminpass; then
     nm-connection-editor
     $0
     exit 0
 fi
 
-if [ "$password" = "ping" ];then
+if [ "$username" = "ping" ];then
     if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
         mtr $(cat ~/destination.rdp | grep "full address:s:" | sed 's/full address:s://g' | sed 's/:.*//g' | tr -d '\r' | tr -d '\n')
     else
@@ -251,7 +300,7 @@ if [ "$password" = "ping" ];then
     exit 0
 fi
 
-if [ "$password" = "ip" ];then
+if [ "$username" = "ip" ];then
     yad --title="Network Information"  --center --text="Hostname: $hostname\nLocal IP: $(hostname --all-ip-addresses || hostname -I)\nPublic IP: $(curl -4 ifconfig.me)\n$(resolvectl status | grep "DNS Servers" | sed -e 's/^[ \t]*//')\nGateway: $(ip route | awk '/default/ { print $3 }')" --button="Ok"
     $0
     exit 0
@@ -259,8 +308,8 @@ fi
 
 # This section handles the default configuration and configuration dialogue
 if [ ! -f ~/tcconfig ];then
-    yad --info --ellipsize=middle --center --title="User Friendly Thin Client $VERSION by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the login password.\nYou can also use the login password terminal to access the terminal.\n\nNOTE: If you enter an admin password you will need to type this in front of the commands,\nthis version stores that password in plain text so do not submit your usual administrator passwords.\n\nCommands:\nconfig: Configuration screen\nterminal: Interactive Terminal\nnetwork: Network Configuration\nping (Without password): My Traceroute\nip (Without password): Show IP information\nkill: Shut down this tool"
-    password=config
+    yad --info --ellipsize=middle --center --title="User Friendly Thin Client $VERSION by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the username along with your admin password.\nThe admin password is stored as a SHA256 hash and in future config screens it will appear longer than your input.\n\nSpecial usernames:\nconfig: Configuration screen\nterminal: Interactive Terminal\nnetwork: Network Configuration\nping (No password required): My Traceroute\nip (No password required): Show IP information\nkill: Shut down this tool"
+    username=config
     helpdesk="the helpdesk"
     volume="100"
     microphone="100"
@@ -270,7 +319,7 @@ if [ ! -f ~/tcconfig ];then
     exit_type="Shutdown"
 fi
 
-if [ "$password" = $adminpass"config" ];then
+if [ "$username" = "config" ] && correct_adminpass; then
     server=$server_list
     OUTPUT=$(yad --form --center --window-icon=changes-allow --image=preferences-system --title="Configuration Utility | $VERSION" \
         --text="This will replace the configuration file with the provided settings" \
@@ -297,7 +346,7 @@ if [ "$password" = $adminpass"config" ];then
         echo server=\"$(awk -F'\x1F' '{print $2}' <<<$OUTPUT)\" > ~/tcconfig
         echo domain=\"$(awk -F'\x1F' '{print $3}' <<<$OUTPUT)\" >> ~/tcconfig
         echo param=\"$(awk -F'\x1F' '{print $4}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo adminpass=\"$(awk -F'\x1F' '{print $6}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo adminpass=\"$(hash_password "$(awk -F'\x1F' '{print $6}' <<<$OUTPUT)")\" >> ~/tcconfig
         echo helpdesk=\"$(awk -F'\x1F' '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
         echo login_timeout=\"$(awk -F'\x1F' '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
         echo volume=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
