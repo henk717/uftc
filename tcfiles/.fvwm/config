@@ -91,6 +91,7 @@ Style "*" PositionPlacement Center
 ######################## Initialization Functions ############################
 AddToFunc StartFunction
 + I Module FvwmBacker
++ I Exec bash -c "while true; do udiskie; sleep 2; done" &
 + I exec thinclient
 
 ######################## Menus ###################

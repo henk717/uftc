@@ -2,7 +2,7 @@ FROM debian:trixie
 
 COPY tcfiles/debian.sources /etc/apt/sources.list.d/debian.sources
 
-RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit light mingetty polkitd net-tools iw wpasupplicant systemd-resolved nm-connection-editor ethtool ifupdown network-manager-pptp-gnome network-manager-l2tp-gnome network-manager-openvpn-gnome network-manager-sstp-gnome enca nano udiskie mc mtr cups mesa-utils firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 open-vm-tools ffmpeg pulseaudio pamixer x11-xserver-utils adwaita-icon-theme-legacy libfuse2 -y
+RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit light lightdm polkitd net-tools iw wpasupplicant systemd-resolved nm-connection-editor ethtool ifupdown network-manager-pptp-gnome network-manager-l2tp-gnome network-manager-openvpn-gnome network-manager-sstp-gnome enca nano udiskie mc mtr cups mesa-utils firmware-linux firmware-linux-nonfree firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 open-vm-tools ffmpeg pulseaudio pamixer x11-xserver-utils adwaita-icon-theme-legacy libfuse2 -y
 
 COPY icaclient.deb* /tmp/
 RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
@@ -17,15 +17,10 @@ COPY tcfiles/099_tc /etc/sudoers.d/099_tc
 COPY tcfiles/usb-access.rules /etc/udev/rules.d/usb-access.rules
 RUN chmod +x /usr/bin/*
 
-RUN mkdir -p /etc/systemd/system/getty@tty1.service.d
-COPY tcfiles/autologin /etc/systemd/system/getty@tty1.service.d/override.conf
-RUN systemctl enable getty@tty1.service
+COPY tcfiles/autologin /etc/lightdm/lightdm.conf.d/autologin.conf
 
 COPY tcfiles/tc-copyconfig.service /etc/systemd/system/tc-copyconfig.service
 RUN systemctl enable tc-copyconfig.service
-
-#COPY tcfiles/tc-copywpa.service /etc/systemd/system/tc-copywpa.service
-#RUN systemctl enable tc-copywpa.service
 
 COPY tcfiles/tc-copynm.service /etc/systemd/system/tc-copynm.service
 RUN systemctl enable tc-copynm.service
@@ -36,8 +31,9 @@ RUN systemctl enable tc-wifipower.service
 COPY tcfiles/tc-wakeonlan.service /etc/systemd/system/tc-wakeonlan.service
 RUN systemctl enable tc-wakeonlan.service
 
-#COPY tcfiles/dhcp.network /etc/systemd/network/dhcp.network
-#COPY tcfiles/interfaces /etc/network/interfaces
+#COPY tcfiles/tc-automount.service /etc/systemd/system/tc-automount.service
+#RUN systemctl enable tc-automount.service
+
 COPY tcfiles/NetworkManager.conf /etc/NetworkManager/NetworkManager.conf
 
 COPY tcfiles/xorg.conf /etc/X11/xorg.conf.d/thinclient.conf
@@ -49,13 +45,16 @@ COPY tcfiles/xorg.conf /etc/X11/xorg.conf.d/thinclient.conf
 RUN useradd -ms /bin/bash thinclient -G video,audio,netdev,render,cdrom,plugdev
 
 COPY tcfiles/.fvwm /home/thinclient/.fvwm
-COPY tcfiles/bashrc /home/thinclient/.bashrc
-COPY tcfiles/xinitrc /home/thinclient/.xinitrc
+#COPY tcfiles/bashrc /home/thinclient/.bashrc
+#COPY tcfiles/xinitrc /home/thinclient/.xinitrc
 COPY Version /tcversion
 COPY tcconfig_override* /home/thinclient/
+RUN mkdir /home/thinclient/.config
+RUN mkdir /home/thinclient/.config/systemd
 
 # Block stock files from being tampered with to harden even more
 RUN chown -R root:thinclient /home/thinclient/ && chmod 1775 /home/thinclient/
+RUN chown thinclient:thinclient /home/thinclient/.config
 
 USER thinclient
 WORKDIR /home/thinclient
