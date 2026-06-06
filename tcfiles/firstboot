@@ -11,4 +11,5 @@ apt install linux-xanmod-lts-x64v1 -y
 setcap cap_net_raw+ep /usr/bin/mtr-packet
 set-hostname thinclient
 systemctl disable systemd-networkd
+rm /etc/resolv.conf
 rm $0 && systemctl poweroff
