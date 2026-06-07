@@ -7,14 +7,10 @@ Wants=NetworkManager-wait-online.service
 Type=oneshot
 RemainAfterExit=yes
 
-# 1. Update Debian CA certificates
-ExecStart=/usr/sbin/update-ca-certificates
-
-# 2. Copy custom certs (safe even if /boot/ssl does not exist)
-ExecStartPost=/bin/sh -c 'shopt -s nullglob; cp -f /boot/ssl/* /etc/ssl/certs/ 2>/dev/null || true'
-
-# 3. Sync to Citrix cacerts (always safe)
+ExecStart=/bin/sh -c 'shopt -s nullglob; cp -f /boot/ssl/* /usr/local/share/ca-certificates/ 2>/dev/null || true'
+ExecStartPost=/bin/sh -c 'shopt -s nullglob; /usr/sbin/update-ca-certificates || true'
 ExecStartPost=/bin/sh -c 'rsync -a --delete /etc/ssl/certs/ /opt/Citrix/ICAClient/keystore/cacerts/'
+ExecStartPost=/bin/sh -c '/opt/Citrix/ICAClient/util/ctx_rehash'
 
 [Install]
 WantedBy=multi-user.target
