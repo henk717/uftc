@@ -7,7 +7,7 @@ Wants=NetworkManager-wait-online.service
 Type=oneshot
 RemainAfterExit=yes
 
-ExecStart=/bin/sh -c 'shopt -s nullglob; rsync -a --delete /boot/ssl/* /usr/local/share/ca-certificates/usercerts/ 2>/dev/null || true'
+ExecStart=/bin/sh -c 'shopt -s nullglob; rsync -a --delete /boot/ssl/ /usr/local/share/ca-certificates/usercerts/ 2>/dev/null || true'
 ExecStartPost=/bin/sh -c 'shopt -s nullglob; /usr/sbin/update-ca-certificates || true'
 ExecStartPost=/bin/sh -c 'rsync -a --delete /etc/ssl/certs/ /opt/Citrix/ICAClient/keystore/cacerts/'
 ExecStartPost=/bin/sh -c '/opt/Citrix/ICAClient/util/ctx_rehash'
