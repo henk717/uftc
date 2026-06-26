@@ -171,6 +171,9 @@ UFTC supports existing RDP files if downloaded from a central location, to do th
 
 There is a basic Citrix mode on board that can be activated by putting citrix as the server name. The URL of the Citrix Storefront can be preconfigured by putting it in the parameters, each time this setting changes to a new URL the Citrix profile is wiped.
 
+If you need to be able to use self-signed certificates you can put them in the ``ssl`` folder on the boot partition.
+These certificates are base64 encoded and have a .crt extention, if your certificate is .pem or .cer in this format renaming is enough.
+
 ### Moonlight Mode
 
 Moonlight is included as a self contained 50mb binary and can be activated by using moonlight as the server address.
