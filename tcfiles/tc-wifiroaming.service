@@ -1,0 +1,11 @@
+[Unit]
+Description=Reapply bgscan settings every 5 minutes
+
+[Service]
+User=root
+ExecStart=/usr/sbin/wpa_cli -i wlan0 set_network 0 bgscan \"simple:30:-65:15\"
+Restart=always
+RestartSec=5min
+
+[Install]
+WantedBy=multi-user.target

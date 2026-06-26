@@ -28,6 +28,9 @@ RUN systemctl enable tc-copynm.service
 COPY tcfiles/tc-wifipower.service /etc/systemd/system/tc-wifipower.service
 RUN systemctl enable tc-wifipower.service
 
+COPY tcfiles/tc-wifiroaming.service /etc/systemd/system/tc-wifiroaming.service
+RUN systemctl enable tc-wifiroaming.service
+
 COPY tcfiles/tc-wakeonlan.service /etc/systemd/system/tc-wakeonlan.service
 RUN systemctl enable tc-wakeonlan.service
 
@@ -35,7 +38,6 @@ COPY tcfiles/tc-certmanager.service /etc/systemd/system/tc-certmanager.service
 RUN systemctl enable tc-certmanager.service
 
 COPY tcfiles/NetworkManager.conf /etc/NetworkManager/NetworkManager.conf
-
 COPY tcfiles/xorg.conf /etc/X11/xorg.conf.d/thinclient.conf
 
 #This line is for pipewire, because pipewire has limited mic support its currently replaced with pulseaudio
