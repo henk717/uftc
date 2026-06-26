@@ -13,8 +13,8 @@ Super simple to setup, and easy for the end user.
 ## Features
 
 - Simple UI, your users only see a login screen and a shutdown button just like you'd want!
-- Admin options are present but hidden behind secret passwords.
-- Users can use the "ping" password to ping the remote server including a full trace route. You don't have to guess where the connection goes wrong just let them send you a picture.
+- Admin options are present but hidden behind special usernames.
+- Users can use the "ping" username/password to ping the remote server including a full trace route. You don't have to guess where the connection goes wrong just let them send you a picture.
 - Error messages that make sense and include your own helpdesk info, your users know exactly who to contact and what to say (Written by an experienced sysadmin who also does first line support).
 - Disk image that is not machine bound, you can capture it any time and redeploy your config on other machines. Hostnames change automatically based on the wired adapters mac address.
 - Optimized RDP defaults, rdp will just work out of the box with optimal quality. If you need to customize this further the option is available.
@@ -94,7 +94,7 @@ The recommended method of flashing VHD's directly is using RescueZilla on a Vent
 ### Network Configuration
 
 As of UFTC 2.4 we use Network Manager for the configuration, the old wpa_supplicant.conf file is no longer compatible.
-The easiest way to set up networking is by using [admin]network as the login password for a GUI based configuration.
+The easiest way to set up networking is by using network as the login username for a GUI based configuration.
 If you prefer placing config files similar to tcconfig you can create a system-connections folder on the boot partition.
 This folder you can fill with the .nmconnection files from /etc/NetworkManager/system-connections .
 Here is an example of wifi.nmconnection to get you started:
