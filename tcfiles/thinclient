@@ -249,7 +249,7 @@ if [ -f ~/tcconfig ];then
         yad --center --title=Loading --button="Please wait" --timeout=1
         if [ "$?" == "70" ];then
             if [ -f /usr/bin/horizon-client ];then
-                /usr/bin/horizon-client -hideClientAfterLaunchSession $param
+                /usr/bin/horizon-client --hideClientAfterLaunchSession $param
                 shutdown_thinclient
             fi
         fi
