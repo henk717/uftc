@@ -244,6 +244,17 @@ if [ -f ~/tcconfig ];then
         fi
     fi
 
+    # Horizon
+    if [ "$server" = "horizon" ];then
+        yad --center --title=Loading --button="Please wait" --timeout=1
+        if [ "$?" == "70" ];then
+            if [ -f /usr/bin/horizon-client ];then
+                /usr/bin/horizon-client -hideClientAfterLaunchSession $param
+                shutdown_thinclient
+            fi
+        fi
+    fi
+
     # RDP File support, this will break the server string for the other modes so we do it last
     if [[ "$server" == *"$PROTOCOL_DETECT"* ]]; then
         curl -m 5 -fLs "$server" | enconv -L none -x UTF-8 > ~/destination.tmp && [ -s ~/destination.tmp ] && mv ~/destination.tmp ~/destination.rdp

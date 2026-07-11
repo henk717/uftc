@@ -8,6 +8,7 @@ echo "deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xa
 apt update
 apt install wireguard -y
 apt install linux-xanmod-lts-x64v1 -y
+apt install /opt/horizon.deb -y && rm /opt/horizon.deb || true
 setcap cap_net_raw+ep /usr/bin/mtr-packet
 set-hostname thinclient
 systemctl disable systemd-networkd

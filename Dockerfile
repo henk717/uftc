@@ -7,6 +7,8 @@ RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit l
 COPY icaclient.deb* /tmp/
 RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
 
+COPY horizon.deb* /opt/
+
 COPY Moonlight.AppImage* /usr/bin/moonlight
 
 COPY tcfiles/thinclient /usr/bin/thinclient
