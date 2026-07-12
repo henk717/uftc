@@ -251,6 +251,9 @@ if [ -f ~/tcconfig ];then
             if [ -f /usr/bin/horizon-client ];then
                 export LC_ALL=en_us.UTF8
                 /usr/bin/horizon-client --hideClientAfterLaunchSession $param
+                while pgrep -f firefox >/dev/null || pgrep -f horizon-client >/dev/null; do
+                    sleep 5 # Horizon is super annoying and exits itself during some logins, we have to monitor until all instances are gone...
+                done
                 shutdown_thinclient
             fi
         fi
