@@ -55,7 +55,7 @@ COPY tcfiles/.fvwm /home/thinclient/.fvwm
 #COPY tcfiles/bashrc /home/thinclient/.bashrc
 #COPY tcfiles/xinitrc /home/thinclient/.xinitrc
 COPY Version /tcversion
-COPY tcconfig_override* /home/thinclient/
+COPY tcconfig_override* /home/thinclient/.tcconfig_override
 RUN mkdir /home/thinclient/.config
 RUN mkdir /home/thinclient/.config/systemd
 

@@ -130,30 +130,34 @@ load_config ()
 
 # Config file (down)loading and also the start of the main UI routine
 if [ -f ~/tcconfig ];then
+    mv ~/tcconfig ~/.tcconfig
+fi
+
+if [ -f ~/.tcconfig ];then
     load_config ~/config_url
-    load_config ~/tcconfig
+    load_config ~/.tcconfig
 
     if [[ $config_url ]]; then
         config_url_invalid="$config_url"
-        curl -fLo ~/tcconfig $config_url
+        curl -fLo ~/.tcconfig $config_url
         # If downloads fail we try the last successful one just in case someone made a typo, if its successful we backup the working URL
         if [ $? -ne 0 ]; then
             echo "Download failed, trying backup URL"
             load_config ~/config_url
-            curl -fLo ~/tcconfig $config_url
+            curl -fLo ~/.tcconfig $config_url
             config_url="Config URL $config_url_invalid failed to download, the above settings are from a backup."  # This was a dilemma since it can pick either one from the file depending on external servers, lets just warn instead. In an automatic scenario this is not saved, even if the admin ends up saving this the backup URL should revert it again.
         else
             # Double check what we received has a config_url before replacing our known one
-            if grep -F "config_url=" ~/tcconfig ;then
+            if grep -F "config_url=" ~/.tcconfig ;then
                 echo "Valid config received, updating config_url"
                 echo config_url=$config_url > ~/config_url
                 # Quick reload in case things changed, spares the user the reboot
-                load_config ~/tcconfig
+                load_config ~/.tcconfig
             else
                 # Something didn't go right and we did not use the new URL successfully
                 load_config ~/config_url
-                curl -fLo ~/tcconfig $config_url
-                load_config ~/tcconfig
+                curl -fLo ~/.tcconfig $config_url
+                load_config ~/.tcconfig
                 if [ "$config_url_invalid" == "$config_url" ]; then
                     config_url="Config URL $config_url_invalid was invalid and a backup was used." # This was a dilemma since it can pick either one from the file depending on external servers, lets just warn instead. In an automatic scenario this is not saved, even if the admin ends up saving this the backup URL should revert it again.
                 fi
@@ -161,7 +165,7 @@ if [ -f ~/tcconfig ];then
         fi
     fi
 
-    load_config ~/tcconfig_override
+    load_config ~/.tcconfig_override
     original_param=$param
     # Some values used to be hardcoded but are important, we define the old hardcoded variables here in case they are missing from production configs
     if [[ -z "$exit_type" ]]; then
@@ -324,7 +328,7 @@ if [ "$username" = "ip" ];then
 fi
 
 # This section handles the default configuration and configuration dialogue
-if [ ! -f ~/tcconfig ];then
+if [ ! -f ~/.tcconfig ];then
     yad --info --ellipsize=middle --center --title="User Friendly Thin Client $VERSION by Henk.Tech" --text="You have not yet configured your thin client and a configuration screen will now open.\nTo access this configuration screen at a later time use config as the username along with your admin password.\nThe admin password is stored as a SHA256 hash and in future config screens it will appear longer than your input.\n\nSpecial usernames:\nconfig: Configuration screen\nterminal: Interactive Terminal\nnetwork: Network Configuration\nping (No password required): My Traceroute\nip (No password required): Show IP information\nkill: Shut down this tool"
     username=config
     helpdesk="the helpdesk"
@@ -360,19 +364,19 @@ if [ "$username" = "config" ] && correct_adminpass; then
         --field="Remote Config Location" "$config_url" )
     OUTPUT_RESULTS=$?
     if ((OUTPUT_RESULTS == 0)); then
-        echo server=\"$(awk -F'\x1F' '{print $2}' <<<$OUTPUT)\" > ~/tcconfig
-        echo domain=\"$(awk -F'\x1F' '{print $3}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo param=\"$(awk -F'\x1F' '{print $4}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo adminpass=\"$(hash_password "$(awk -F'\x1F' '{print $6}' <<<$OUTPUT)")\" >> ~/tcconfig
-        echo helpdesk=\"$(awk -F'\x1F' '{print $7}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo login_timeout=\"$(awk -F'\x1F' '{print $8}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo volume=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo microphone=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo brightness=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo screen_timeout=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo keylayout=\"$(awk -F'\x1F' '{print $14}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo exit_type=\"$(awk -F'\x1F' '{print $15}' <<<$OUTPUT)\" >> ~/tcconfig
-        echo config_url=\"$(awk -F'\x1F' '{print $17}' <<<$OUTPUT)\" >> ~/tcconfig
+        echo server=\"$(awk -F'\x1F' '{print $2}' <<<$OUTPUT)\" > ~/.tcconfig
+        echo domain=\"$(awk -F'\x1F' '{print $3}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo param=\"$(awk -F'\x1F' '{print $4}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo adminpass=\"$(hash_password "$(awk -F'\x1F' '{print $6}' <<<$OUTPUT)")\" >> ~/.tcconfig
+        echo helpdesk=\"$(awk -F'\x1F' '{print $7}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo login_timeout=\"$(awk -F'\x1F' '{print $8}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo volume=\"$(awk -F'\x1F' '{print $10}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo microphone=\"$(awk -F'\x1F' '{print $11}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo brightness=\"$(awk -F'\x1F' '{print $12}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo screen_timeout=\"$(awk -F'\x1F' '{print $13}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo keylayout=\"$(awk -F'\x1F' '{print $14}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo exit_type=\"$(awk -F'\x1F' '{print $15}' <<<$OUTPUT)\" >> ~/.tcconfig
+        echo config_url=\"$(awk -F'\x1F' '{print $17}' <<<$OUTPUT)\" >> ~/.tcconfig
     else
         yad --error --title="Error" --center --ellipsize=middle --text="Configuration cancelled or failed"
     fi
