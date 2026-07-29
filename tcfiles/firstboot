@@ -12,5 +12,6 @@ apt install /opt/horizon.deb -y && rm /opt/horizon.deb || true
 setcap cap_net_raw+ep /usr/bin/mtr-packet
 set-hostname thinclient
 systemctl disable systemd-networkd
+apt remove gnome-keyring -y
 rm /etc/resolv.conf
 rm $0 && systemctl poweroff

@@ -174,6 +174,16 @@ There is a basic Citrix mode on board that can be activated by putting citrix as
 If you need to be able to use self-signed certificates you can put them in the ``ssl`` folder on the boot partition.
 These certificates are base64 encoded and have a .crt extention, if your certificate is .pem or .cer in this format renaming is enough.
 
+### Horizon View mode
+
+Similar to the Citrix mode above Horizon mode can be activated by using horizon as the server name.
+Optionally you can specify horizon parameters in the additional parameters, do keep in mind that they must contain a leading space at the very beginning otherwise the - will be treated as an ignored field later on which can corrupt the config (This is a limitation of the GUI framework we work with that has no remedy).
+For example (Without quotes): " -q -s horizon.company.com" for an automatic login to the correct Horizon server.
+Browser based login is supported but must be initiated by the Horizon client, these browser logins run isolated and do not store cookies or session data.
+
+In Horizon mode UFTC automatically shuts down when all Horizon and Browser windows are closed.
+Note: Horizon lacks a built in webbrowser, if you self build the thin client you must also include browseframe.deb if you need web authentication. For the premade images it is included.
+
 ### Moonlight Mode
 
 Moonlight is included as a self contained 50mb binary and can be activated by using moonlight as the server address.
