@@ -398,7 +398,7 @@ if [[ "$server" != "citrix" && "$server" != "moonlight" && "$server" != "horizon
     fi
 
     if [[ -n "$param" ]]; then
-        param=$(printf '%q' "$param")
+        param=$(sed -E 's/(\&\&|\|\|)//g; s/[;&|<>`$(){}]//g' <<< "$param")
     fi
 
     if [[ -n "$hostname" ]]; then
