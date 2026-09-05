@@ -247,6 +247,17 @@ if [ -f ~/.tcconfig ];then
             fi
         fi
     fi
+    
+    # Parallels
+    if [ "$server" = "parallels" ];then
+        yad --center --title=Loading --button="Please wait" --timeout=1
+        if [ "$?" == "70" ];then
+            if [ -f /opt/2X/Client/bin/2XClient ];then
+                 /opt/2X/Client/bin/2XClient $param
+                shutdown_thinclient
+            fi
+        fi
+    fi
 
     # Horizon
     if [ "$server" = "horizon" ];then
@@ -386,7 +397,7 @@ fi
 
 # We passed all the UI's and now try to launch RDP
 echo "Start of session" > session.log
-if [[ "$server" != "citrix" && "$server" != "moonlight" && "$server" != "horizon" ]]; then
+if [[ "$server" != "citrix" && "$server" != "moonlight" && "$server" != "parallels" && "$server" != "horizon" ]]; then
     # Because we are about to bash -c we sanetize the inputs which bash -c will convert back properly
     # Conditional because xfreerdp breaks if we do this with an empty variable
     if [[ -n "$rdp_destination" ]]; then
