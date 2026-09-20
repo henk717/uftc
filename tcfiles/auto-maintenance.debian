@@ -112,6 +112,7 @@ fi
 
 #Remove unrequired packages
 apt autoremove --purge -yq
+apt clean
 
 #Update the system using APT
 DEBIAN_FRONTEND=noninteractive \
