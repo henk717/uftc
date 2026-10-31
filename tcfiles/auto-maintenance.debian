@@ -49,7 +49,6 @@ WantedBy=multi-user.target' > /etc/systemd/system/auto-maintenance.service
 systemctl enable auto-maintenance
 echo Automatic Maintenance will be enabled upon reboot.
 echo Use systemctl start auto-maintenance to start the service immediately.
-read -p "Press a key to continue"
 exit 0
 fi
 
@@ -58,7 +57,6 @@ systemctl stop auto-maintenance
 systemctl disable auto-maintenance
 rm /etc/systemd/system/auto-maintenance.service
 echo Automatic Maintenance is now disabled.
-read -p "Press a key to continue"
 exit 0
 fi
 

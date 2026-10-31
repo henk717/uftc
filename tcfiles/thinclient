@@ -193,7 +193,11 @@ if [ -f ~/.tcconfig ];then
     light -S $brightness
     setxkbmap $keylayout
     xset dpms 0 $screen_timeout 0
-
+    case "${auto_maintenance}" in
+            enable) auto-maintenance enable ;;
+            disable) auto-maintenance disable ;;
+            *) : ;; # Continue/Do nothing
+    esac
 
     # Handle multiple servers
     server_list=$server # We duplicate this so that a full list remains available, that way we don't break the existing code and configs
