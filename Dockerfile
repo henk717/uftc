@@ -7,6 +7,9 @@ RUN apt update && apt install sudo curl wget freerdp3-x11 yad fvwm xterm xinit l
 COPY icaclient.deb* /tmp/
 RUN apt install /tmp/icaclient.deb -y && rm /tmp/icaclient.deb || true
 
+COPY browseframe.deb* /tmp/
+RUN apt install /tmp/browseframe.deb -y && rm /tmp/browseframe.deb || true
+
 COPY RASClient.deb* /tmp/
 RUN apt install /tmp/RASClient.deb -y && rm /tmp/RASClient.deb || true
 
